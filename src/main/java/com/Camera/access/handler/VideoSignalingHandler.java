@@ -9,17 +9,17 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class VideoSignalingHandler extends TextWebSocketHandler {
 
-    // Sabhi active browsers ki list
     private static final List<WebSocketSession> sessions = new CopyOnWriteArrayList<>();
 
     @Override
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         sessions.add(session);
+        System.out.println("New connection: " + session.getId());
     }
 
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
-        // Ek side se signal aaye toh dusre ko forward kar do
+        // Broadcast signals to all other connected clients
         for (WebSocketSession s : sessions) {
             if (s.isOpen() && !s.getId().equals(session.getId())) {
                 s.sendMessage(message);
@@ -30,5 +30,6 @@ public class VideoSignalingHandler extends TextWebSocketHandler {
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         sessions.remove(session);
+        System.out.println("Connection closed: " + session.getId());
     }
 }

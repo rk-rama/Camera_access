@@ -15,7 +15,6 @@
         #remoteVideo { width: 100%; height: 100%; object-fit: cover; }
         .live-indicator { position: absolute; top: 20px; left: 20px; background: var(--primary); padding: 5px 15px; border-radius: 5px; font-size: 12px; font-weight: 600; animation: blink 1.5s infinite; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .controls { margin-top: 20px; }
         .status-msg { color: #94a3b8; font-size: 14px; margin-top: 10px; }
     </style>
 </head>
@@ -38,58 +37,53 @@
     let peerConnection;
     let socket;
 
+    const configuration = {
+        'iceServers': [
+            { 'urls': 'stun:stun.l.google.com:19302' },
+            { 'urls': 'stun:stun1.l.google.com:19302' }
+        ]
+    };
+
     function connectWebSocket() {
-        socket = new WebSocket("ws://" + window.location.host + "/video-stream");
+        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        socket = new WebSocket(protocol + window.location.host + "/video-stream");
 
         socket.onopen = () => {
-            console.log("Admin Connected to Server ✅");
             document.getElementById('statusMsg').innerText = "Connected. Waiting for stream...";
         };
 
         socket.onmessage = async (event) => {
             const data = JSON.parse(event.data);
-
             if (data.type === 'offer') {
-                console.log("Received offer from user! 📥");
                 handleOffer(data);
             } else if (data.type === 'candidate' && peerConnection) {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                try { await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch(e){}
             }
         };
+        socket.onclose = () => setTimeout(connectWebSocket, 2000);
     }
 
     async function handleOffer(offer) {
-        const configuration = { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] };
         peerConnection = new RTCPeerConnection(configuration);
-
-        // Jab user ki stream aaye toh use video tag mein daalna
         peerConnection.ontrack = (event) => {
-            console.log("Stream track received! 🎥");
-            const remoteVideo = document.getElementById('remoteVideo');
-            if (remoteVideo.srcObject !== event.streams[0]) {
-                remoteVideo.srcObject = event.streams[0];
-                document.getElementById('statusMsg').innerText = "STREAMING ACTIVE";
-                document.getElementById('statusMsg').style.color = "#22c55e";
-            }
+            document.getElementById('remoteVideo').srcObject = event.streams[0];
+            document.getElementById('statusMsg').innerText = "STREAMING ACTIVE";
+            document.getElementById('statusMsg').style.color = "#22c55e";
         };
 
         peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
+            if (event.candidate && socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));
             }
         };
 
         await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
-
         socket.send(JSON.stringify({ type: 'answer', sdp: answer.sdp }));
-        console.log("Answer sent to user! 📤");
     }
 
     window.onload = connectWebSocket;
 </script>
-
 </body>
 </html>
