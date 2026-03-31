@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamer Dashboard | SecureStream</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --accent: #ef4444;
+            --bg: #0f172a;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top left, #1e293b, #0f172a); height: 100vh; color: white; display: flex; flex-direction: column; }
+        header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+        .logo { font-size: 22px; font-weight: 600; color: var(--primary); }
+        .logo span { color: white; }
+        .container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
+        .video-container { position: relative; background: #000; border-radius: 24px; overflow: hidden; width: 100%; max-width: 700px; aspect-ratio: 16/9; box-shadow: 0 0 40px rgba(0, 0, 0, 0.5); border: 2px solid var(--border); margin-bottom: 30px; }
+        #localVideo { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        .status-tag { position: absolute; top: 20px; right: 20px; padding: 6px 12px; background: rgba(0, 0, 0, 0.6); border-radius: 8px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .dot { height: 8px; width: 8px; background: #64748b; border-radius: 50%; }
+        .dot.active { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        .controls { display: flex; gap: 20px; }
+        .btn { padding: 14px 28px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; border: none; display: flex; align-items: center; gap: 10px; font-size: 15px; }
+        .btn-secondary { background: var(--glass); color: white; border: 1px solid var(--border); }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+        .hint-text { margin-top: 20px; color: #94a3b8; font-size: 13px; }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="logo">Secure<span>Stream</span></div>
+    <div class="user-profile">User Dashboard</div>
+</header>
+
+<div class="container">
+    <div class="video-container">
+        <div class="status-tag">
+            <span id="liveDot" class="dot"></span>
+            <span id="statusLabel">OFFLINE</span>
+        </div>
+        <video id="localVideo" autoplay playsinline muted></video>
+    </div>
+
+    <div class="controls">
+        <button type="button" class="btn btn-secondary" onclick="handleStartCamera()">
+            Step 1: Start Camera
+        </button>
+        <button type="button" id="goLiveBtn" class="btn btn-primary" onclick="handleGoLive()" disabled>
+            Step 2: Go Live
+        </button>
+    </div>
+    <p class="hint-text">Your stream is private until you click "Go Live"</p>
+</div>
+
+<script>
+    let localStream;
+    let peerConnection;
+    let socket;
+
+    // WebSocket Setup
+    function connectWebSocket() {
+        socket = new WebSocket("ws://" + window.location.host + "/video-stream");
+        socket.onopen = () => console.log("WebSocket Connected ✅");
+        socket.onmessage = async (event) => {
+            const data = JSON.parse(event.data);
+            if (data.type === 'answer') {
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data));
+            } else if (data.type === 'candidate' && peerConnection) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+            }
+        };
+    }
+
+    // STEP 1 Logic
+    async function handleStartCamera() {
+        console.log("Step 1: Requesting camera...");
+        try {
+            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+            const videoElement = document.getElementById('localVideo');
+            if (videoElement) {
+                videoElement.srcObject = localStream;
+                document.getElementById('goLiveBtn').disabled = false;
+                document.getElementById('statusLabel').innerText = "CAMERA READY";
+                document.getElementById('statusLabel').style.color = "#3b82f6";
+                console.log("Camera successfully started! 🎥");
+            }
+        } catch (error) {
+            console.error("Camera Error:", error);
+            alert("Camera permission allow karein! Browser lock icon check karein.");
+        }
+    }
+
+    // STEP 2 Logic
+    async function handleGoLive() {
+        console.log("Step 2: Sending Offer...");
+        if (!localStream) return;
+
+        const configuration = { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }] };
+        peerConnection = new RTCPeerConnection(configuration);
+
+        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
+
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));
+            }
+        };
+
+        const offer = await peerConnection.createOffer();
+        await peerConnection.setLocalDescription(offer);
+
+        if (socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: 'offer', sdp: offer.sdp }));
+            document.getElementById('liveDot').classList.add('active');
+            document.getElementById('statusLabel').innerText = "LIVE";
+            document.getElementById('statusLabel').style.color = "#ef4444";
+        }
+    }
+
+    // Auto connect WebSocket on page load
+    window.onload = connectWebSocket;
+</script>
+
+</body>
+</html>
