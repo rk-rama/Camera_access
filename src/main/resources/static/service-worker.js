@@ -1,17 +1,26 @@
-const CACHE_NAME = 'v1';
+const CACHE_NAME = 'secure-stream-v1';
 
-// Install event
-self.addEventListener('install', (e) => {
-    console.log('Service Worker: Installed');
+// Install Event
+self.addEventListener('install', event => {
     self.skipWaiting();
 });
 
-// Activate event
-self.addEventListener('activate', (e) => {
-    console.log('Service Worker: Activated');
+// Activate Event
+self.addEventListener('activate', event => {
+    event.waitUntil(caches.keys().then(names => Promise.all(names.map(n => caches.delete(n)))));
+    return self.clients.claim();
 });
 
-// Fetch event (Optional: Offline support ke liye)
-self.addEventListener('fetch', (e) => {
-    e.respondWith(fetch(e.request).catch(() => caches.match(e.request)));
+// Fetch Event (Main Fix)
+self.addEventListener('fetch', event => {
+    const url = event.request.url;
+
+    // Render aur Streaming requests ko bilkul mat chhedo
+    if (url.includes('onrender.com') || url.includes('video-stream') || event.request.headers.get('Upgrade') === 'websocket') {
+        return; // Direct network par bhej do
+    }
+
+    event.respondWith(
+        fetch(event.request).catch(() => caches.match(event.request))
+    );
 });
