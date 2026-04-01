@@ -19,45 +19,111 @@
     <div id="liveBadge" class="live-tag">LIVE FEED</div>
     <video id="remoteVideo" autoplay playsinline muted></video>
 </div>
-<div class="status-msg" id="statusMsg">Connecting to secure socket...</div>
+<div class="status-msg" id="statusMsg">Initializing secure connection...</div>
 
 <script>
     let peerConnection;
     let socket;
-    const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
+    // Google STUN servers for NAT Traversal (Very important for Phone-to-Laptop)
+    const config = {
+        iceServers: [
+            { urls: 'stun:stun.l.google.com:19302' },
+            { urls: 'stun:stun1.l.google.com:19302' },
+            { urls: 'stun:stun2.l.google.com:19302' }
+        ]
+    };
 
     function connect() {
-        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-        socket = new WebSocket(protocol + window.location.host + "/video-stream");
+        // Render ka static secure URL use kar rahe hain bypass ke liye
+        const wsUrl = "wss://camera-access.onrender.com/video-stream";
+        console.log("Connecting to WebSocket:", wsUrl);
 
-        socket.onopen = () => document.getElementById('statusMsg').innerText = "Connected ✅ Waiting for Phone...";
+        socket = new WebSocket(wsUrl);
+
+        socket.onopen = () => {
+            console.log("WebSocket Status: CONNECTED! ✅");
+            document.getElementById('statusMsg').innerText = "Connected ✅ Waiting for Phone...";
+        };
 
         socket.onmessage = async (event) => {
+            console.log("New Signal Received:", event.data);
             const data = JSON.parse(event.data);
-            if (data.type === 'offer') handleOffer(data);
-            else if (data.type === 'candidate' && peerConnection) {
-                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+
+            if (data.type === 'offer') {
+                console.log("Offer detected. Starting WebRTC Negotiation...");
+                handleOffer(data);
+            } else if (data.type === 'candidate' && peerConnection) {
+                try {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                    console.log("ICE Candidate synchronized! ❄️");
+                } catch (e) {
+                    console.error("Error adding candidate:", e);
+                }
             }
         };
-        socket.onclose = () => setTimeout(connect, 3000);
+
+        socket.onerror = (error) => {
+            console.error("WebSocket Error ❌:", error);
+            document.getElementById('statusMsg').innerText = "Network Error! ❌ (Check Console)";
+        };
+
+        socket.onclose = () => {
+            console.log("Socket Closed. Reconnecting...");
+            document.getElementById('statusMsg').innerText = "Reconnecting to server...";
+            setTimeout(connect, 3000); // 3 second baad retry
+        };
     }
 
     async function handleOffer(offer) {
+        // Naya Peer Connection banayein
         peerConnection = new RTCPeerConnection(config);
-        peerConnection.ontrack = (e) => {
-            document.getElementById('remoteVideo').srcObject = e.streams[0];
-            document.getElementById('liveBadge').style.visibility = "visible";
-            document.getElementById('statusMsg').innerText = "LIVE FEED ACTIVE 🟢";
+
+        // Jab phone se video track aaye, toh video element mein set karein
+        peerConnection.ontrack = (event) => {
+            console.log("Video Stream Received! 🎥 Starting playback...");
+            const remoteVideo = document.getElementById('remoteVideo');
+            if (remoteVideo.srcObject !== event.streams[0]) {
+                remoteVideo.srcObject = event.streams[0];
+                document.getElementById('liveBadge').style.visibility = "visible";
+                document.getElementById('statusMsg').innerText = "LIVE FEED ACTIVE 🟢";
+            }
         };
-        peerConnection.onicecandidate = (e) => {
-            if (e.candidate) socket.send(JSON.stringify({ type: 'candidate', candidate: e.candidate }));
+
+        // Network candidates phone ko bhejein
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate) {
+                socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));
+            }
         };
-        await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
-        const answer = await peerConnection.createAnswer();
-        await peerConnection.setLocalDescription(answer);
-        socket.send(JSON.stringify({ type: 'answer', sdp: answer.sdp }));
+
+        // Connection State monitor karein
+        peerConnection.oniceconnectionstatechange = () => {
+            console.log("Connection Status:", peerConnection.iceConnectionState);
+            if (peerConnection.iceConnectionState === "disconnected") {
+                document.getElementById('statusMsg').innerText = "Phone Disconnected! 🔴";
+                document.getElementById('liveBadge').style.visibility = "hidden";
+            }
+        };
+
+        try {
+            // Offer accept karein aur Answer generate karein
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+            const answer = await peerConnection.createAnswer();
+            await peerConnection.setLocalDescription(answer);
+
+            // Phone ko Answer bhej dein
+            socket.send(JSON.stringify({
+                type: 'answer',
+                sdp: answer.sdp
+            }));
+            console.log("Answer sent to phone! 📤 Waiting for video...");
+        } catch (e) {
+            console.error("WebRTC Handshake Error:", e);
+        }
     }
 
+    // Page load hote hi connect karein
     window.onload = connect;
 </script>
 </body>
