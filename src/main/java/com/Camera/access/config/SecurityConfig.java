@@ -21,8 +21,13 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .headers(headers -> headers.frameOptions(frame -> frame.disable())) // H2 Console ke liye
                 .authorizeHttpRequests(auth -> auth
+                        // --- YE CHANGES KIYE HAIN ---
                         .requestMatchers("/css/**", "/js/**", "/images/**", "/h2-console/**").permitAll()
                         .requestMatchers("/login", "/register", "/dashboard").permitAll()
+
+                        // Sabse Important: WebSocket path ko public karo taaki phone connect ho sake
+                        .requestMatchers("/video-stream/**").permitAll()
+
                         .requestMatchers("/admin/**").hasRole("ADMIN")
                         .requestMatchers("/user/**").hasRole("USER")
                         .anyRequest().authenticated()
