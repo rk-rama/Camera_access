@@ -2,125 +2,63 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Control | Secure Stream</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Admin Control | SecureStream</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        :root { --primary: #ef4444; --bg: #0f172a; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
-        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: white; display: flex; flex-direction: column; height: 100vh; }
-        header { padding: 20px 40px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
-        .logo { font-size: 22px; font-weight: 600; color: #3b82f6; }
-        .logo span { color: var(--primary); }
-        .container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .monitor-box { width: 100%; max-width: 800px; aspect-ratio: 16/9; background: #000; border-radius: 20px; border: 2px solid var(--primary); position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(239, 68, 68, 0.2); }
-        #remoteVideo { width: 100%; height: 100%; object-fit: cover; background: black; }
-        .live-indicator { position: absolute; top: 20px; left: 20px; background: var(--primary); padding: 5px 15px; border-radius: 5px; font-size: 12px; font-weight: 600; animation: blink 1.5s infinite; visibility: hidden; z-index: 10; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .status-msg { color: #94a3b8; font-size: 14px; margin-top: 15px; background: var(--glass); padding: 10px 20px; border-radius: 10px; border: 1px solid var(--border); }
+        body { margin: 0; font-family: 'Poppins', sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: center; }
+        .monitor-box { width: 90%; max-width: 800px; aspect-ratio: 16/9; background: #000; border-radius: 20px; border: 2px solid #ef4444; position: relative; box-shadow: 0 0 30px rgba(239, 68, 68, 0.2); overflow: hidden; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        .status-msg { margin-top: 20px; padding: 10px 20px; background: rgba(255,255,255,0.05); border-radius: 10px; font-size: 14px; border: 1px solid rgba(255,255,255,0.1); }
+        .live-tag { position: absolute; top: 20px; left: 20px; background: #ef4444; padding: 5px 15px; border-radius: 5px; font-size: 12px; font-weight: 700; visibility: hidden; animation: blink 1.5s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
 
-<header>
-    <div class="logo">Secure<span>Stream</span> <small style="color:white; font-size:11px; margin-left:10px;">| STEALTH MONITOR</small></div>
-    <div style="font-size: 13px;">Target: <span style="color: #3b82f6;" th:text="${adminName}">Active Phone</span></div>
-</header>
-
-<div class="container">
-    <div class="monitor-box">
-        <div id="liveBadge" class="live-indicator">LIVE FEED ACTIVE</div>
-        <video id="remoteVideo" autoplay playsinline muted></video>
-    </div>
-    <div class="status-msg" id="statusMsg">Initializing Secure Connection...</div>
+<div class="monitor-box">
+    <div id="liveBadge" class="live-tag">LIVE FEED</div>
+    <video id="remoteVideo" autoplay playsinline muted></video>
 </div>
+<div class="status-msg" id="statusMsg">Connecting to secure socket...</div>
 
 <script>
     let peerConnection;
     let socket;
+    const config = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
 
-    // Google STUN Servers (Free for WebRTC)
-    const configuration = {
-        'iceServers': [
-            { 'urls': 'stun:stun.l.google.com:19302' },
-            { 'urls': 'stun:stun1.l.google.com:19302' },
-            { 'urls': 'stun:stun2.l.google.com:19302' }
-        ]
-    };
-
-    function connectWebSocket() {
+    function connect() {
         const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-        // Render URL setup
-        const wsUrl = protocol + window.location.host + "/video-stream";
-        socket = new WebSocket(wsUrl);
+        socket = new WebSocket(protocol + window.location.host + "/video-stream");
 
-        socket.onopen = () => {
-            document.getElementById('statusMsg').innerText = "Connected to Server. Waiting for Phone Stream...";
-            document.getElementById('statusMsg').style.color = "#3b82f6";
-        };
+        socket.onopen = () => document.getElementById('statusMsg').innerText = "Connected ✅ Waiting for Phone...";
 
         socket.onmessage = async (event) => {
-            try {
-                const data = JSON.parse(event.data);
-
-                if (data.type === 'offer') {
-                    console.log("Offer Received from Phone");
-                    handleOffer(data);
-                } else if (data.type === 'candidate' && peerConnection) {
-                    console.log("Adding ICE Candidate");
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-                }
-            } catch (e) {
-                console.error("Signal Error:", e);
+            const data = JSON.parse(event.data);
+            if (data.type === 'offer') handleOffer(data);
+            else if (data.type === 'candidate' && peerConnection) {
+                await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
             }
         };
-
-        socket.onclose = () => {
-            document.getElementById('statusMsg').innerText = "Connection Lost. Retrying...";
-            document.getElementById('statusMsg').style.color = "#ef4444";
-            setTimeout(connectWebSocket, 3000);
-        };
+        socket.onclose = () => setTimeout(connect, 3000);
     }
 
     async function handleOffer(offer) {
-        // Peer Connection Setup
-        peerConnection = new RTCPeerConnection(configuration);
-
-        // Jab remote video track receive ho
-        peerConnection.ontrack = (event) => {
-            console.log("Stream Received!");
-            const remoteVideo = document.getElementById('remoteVideo');
-            if (remoteVideo.srcObject !== event.streams[0]) {
-                remoteVideo.srcObject = event.streams[0];
-                document.getElementById('statusMsg').innerText = "SYSTEM SECURE: LIVE FEED ESTABLISHED";
-                document.getElementById('statusMsg').style.color = "#22c55e";
-                document.getElementById('liveBadge').style.visibility = "visible";
-            }
+        peerConnection = new RTCPeerConnection(config);
+        peerConnection.ontrack = (e) => {
+            document.getElementById('remoteVideo').srcObject = e.streams[0];
+            document.getElementById('liveBadge').style.visibility = "visible";
+            document.getElementById('statusMsg').innerText = "LIVE FEED ACTIVE 🟢";
         };
-
-        // ICE Candidates bhejho phone ko
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate && socket.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify({
-                    type: 'candidate',
-                    candidate: event.candidate
-                }));
-            }
+        peerConnection.onicecandidate = (e) => {
+            if (e.candidate) socket.send(JSON.stringify({ type: 'candidate', candidate: e.candidate }));
         };
-
-        // WebRTC Signaling Process
         await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
-
-        // Send Answer back to Phone
-        socket.send(JSON.stringify({
-            type: 'answer',
-            sdp: answer.sdp
-        }));
+        socket.send(JSON.stringify({ type: 'answer', sdp: answer.sdp }));
     }
 
-    // Start on Page Load
-    window.onload = connectWebSocket;
+    window.onload = connect;
 </script>
 </body>
 </html>
