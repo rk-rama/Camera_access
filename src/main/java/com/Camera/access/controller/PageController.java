@@ -17,6 +17,15 @@ public class PageController {
     @Autowired
     private UserRepository userRepository;
 
+    // ✅ FIXED: Root path mapping add ki hai taaki Whitelabel Error na aaye
+    @GetMapping("/")
+    public String home(Authentication auth) {
+        if (auth != null && auth.isAuthenticated()) {
+            return "redirect:/dashboard";
+        }
+        return "redirect:/login";
+    }
+
     // 1. Login Page
     @GetMapping("/login")
     public String login() {
@@ -49,7 +58,6 @@ public class PageController {
     // 4. User Specific Dashboard
     @GetMapping("/user/dashboard")
     public String userDashboard(Authentication auth, Model model) {
-        // User ka real name database se nikal kar UI par bhejna
         String username = auth.getName();
         Optional<User> user = userRepository.findByUsername(username);
 
