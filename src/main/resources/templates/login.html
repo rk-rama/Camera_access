@@ -1,221 +1,451 @@
+<!--<!DOCTYPE html>-->
+<!--<html xmlns:th="http://www.thymeleaf.org" lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Login | SecureStream</title>-->
+<!--    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">-->
+<!--    <style>-->
+<!--        :root {-->
+<!--            &#45;&#45;primary: #3b82f6;-->
+<!--            &#45;&#45;bg: #0f172a;-->
+<!--            &#45;&#45;glass: rgba(255, 255, 255, 0.05);-->
+<!--            &#45;&#45;border: rgba(255, 255, 255, 0.1);-->
+<!--        }-->
+
+<!--        body {-->
+<!--            margin: 0;-->
+<!--            padding: 0;-->
+<!--            font-family: 'Poppins', sans-serif;-->
+<!--            background: radial-gradient(circle at top right, #1e293b, #0f172a);-->
+<!--            height: 100vh;-->
+<!--            display: flex;-->
+<!--            justify-content: center;-->
+<!--            align-items: center;-->
+<!--            color: white;-->
+<!--            overflow: hidden;-->
+<!--        }-->
+
+<!--        /* Background Animated Shapes */-->
+<!--        .shape {-->
+<!--            position: absolute;-->
+<!--            filter: blur(80px);-->
+<!--            z-index: -1;-->
+<!--            border-radius: 50%;-->
+<!--        }-->
+<!--        .shape-1 { width: 300px; height: 300px; background: var(&#45;&#45;primary); top: -100px; right: -50px; opacity: 0.3; }-->
+<!--        .shape-2 { width: 250px; height: 250px; background: #9333ea; bottom: -50px; left: -50px; opacity: 0.2; }-->
+
+<!--        .login-card {-->
+<!--            background: var(&#45;&#45;glass);-->
+<!--            backdrop-filter: blur(15px);-->
+<!--            -webkit-backdrop-filter: blur(15px);-->
+<!--            border: 1px solid var(&#45;&#45;border);-->
+<!--            padding: 40px;-->
+<!--            border-radius: 24px;-->
+<!--            width: 100%;-->
+<!--            max-width: 400px;-->
+<!--            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        .login-card h2 {-->
+<!--            margin-bottom: 10px;-->
+<!--            font-weight: 600;-->
+<!--            font-size: 28px;-->
+<!--            letter-spacing: -0.5px;-->
+<!--            color: #fff;-->
+<!--        }-->
+
+<!--        .subtitle {-->
+<!--            color: #94a3b8;-->
+<!--            font-size: 14px;-->
+<!--            margin-bottom: 30px;-->
+<!--        }-->
+
+<!--        .form-group {-->
+<!--            margin-bottom: 20px;-->
+<!--            text-align: left;-->
+<!--        }-->
+
+<!--        .form-group label {-->
+<!--            display: block;-->
+<!--            font-size: 13px;-->
+<!--            margin-bottom: 8px;-->
+<!--            color: #cbd5e1;-->
+<!--        }-->
+
+<!--        input {-->
+<!--            width: 100%;-->
+<!--            padding: 12px 16px;-->
+<!--            background: rgba(0, 0, 0, 0.2);-->
+<!--            border: 1px solid var(&#45;&#45;border);-->
+<!--            border-radius: 12px;-->
+<!--            color: white;-->
+<!--            font-size: 14px;-->
+<!--            transition: 0.3s;-->
+<!--            box-sizing: border-box;-->
+<!--        }-->
+
+<!--        input:focus {-->
+<!--            outline: none;-->
+<!--            border-color: var(&#45;&#45;primary);-->
+<!--            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);-->
+<!--        }-->
+
+<!--        .btn-submit {-->
+<!--            width: 100%;-->
+<!--            padding: 14px;-->
+<!--            background: var(&#45;&#45;primary);-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            border-radius: 12px;-->
+<!--            font-weight: 600;-->
+<!--            font-size: 16px;-->
+<!--            cursor: pointer;-->
+<!--            transition: 0.3s;-->
+<!--            margin-top: 10px;-->
+<!--        }-->
+
+<!--        .btn-submit:hover {-->
+<!--            background: #2563eb;-->
+<!--            transform: translateY(-2px);-->
+<!--            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);-->
+<!--        }-->
+
+<!--        /* Error Message Styling */-->
+<!--        .error-msg {-->
+<!--            background: rgba(239, 68, 68, 0.1);-->
+<!--            color: #f87171;-->
+<!--            padding: 12px;-->
+<!--            border-radius: 10px;-->
+<!--            font-size: 13px;-->
+<!--            margin-bottom: 20px;-->
+<!--            border: 1px solid rgba(239, 68, 68, 0.2);-->
+<!--        }-->
+
+<!--        /* Admin Access Box Section */-->
+<!--        .admin-access-box {-->
+<!--            background: rgba(59, 130, 246, 0.08);-->
+<!--            padding: 20px;-->
+<!--            border-radius: 16px;-->
+<!--            border: 1px dashed rgba(59, 130, 246, 0.3);-->
+<!--            margin-top: 5px;-->
+<!--            transition: 0.3s;-->
+<!--        }-->
+
+<!--        .admin-access-box:hover {-->
+<!--            background: rgba(59, 130, 246, 0.12);-->
+<!--            border-style: solid;-->
+<!--        }-->
+
+<!--        .btn-admin {-->
+<!--            background: transparent;-->
+<!--            border: 1.5px solid var(&#45;&#45;primary);-->
+<!--            color: var(&#45;&#45;primary);-->
+<!--            width: 100%;-->
+<!--            padding: 10px;-->
+<!--            border-radius: 10px;-->
+<!--            font-weight: 600;-->
+<!--            font-size: 14px;-->
+<!--            cursor: pointer;-->
+<!--            transition: 0.3s;-->
+<!--        }-->
+
+<!--        .btn-admin:hover {-->
+<!--            background: var(&#45;&#45;primary);-->
+<!--            color: white;-->
+<!--        }-->
+
+<!--        .divider {-->
+<!--            margin: 25px 0;-->
+<!--            display: flex;-->
+<!--            align-items: center;-->
+<!--            gap: 10px;-->
+<!--        }-->
+
+<!--        .divider hr { flex: 1; border: 0; border-top: 1px solid var(&#45;&#45;border); }-->
+<!--        .divider span { font-size: 12px; color: #64748b; font-weight: 600; }-->
+
+<!--        .footer-text { margin-top: 25px; font-size: 14px; color: #94a3b8; }-->
+<!--        .footer-text a { color: var(&#45;&#45;primary); text-decoration: none; font-weight: 600; }-->
+<!--        .footer-text a:hover { text-decoration: underline; }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--<div class="shape shape-1"></div>-->
+<!--<div class="shape shape-2"></div>-->
+
+<!--<div class="login-card">-->
+<!--    <h2>SecureStream</h2>-->
+<!--    <p class="subtitle">Enter your credentials to access the monitor</p>-->
+
+<!--    <div th:if="${param.error}" class="error-msg">-->
+<!--        Invalid username or password. Please try again.-->
+<!--    </div>-->
+
+<!--    <form th:action="@{/login}" method="post">-->
+<!--        <div class="form-group">-->
+<!--            <label>Username</label>-->
+<!--            <input type="text" name="username" placeholder="e.g. user1" required autocomplete="off">-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label>Password</label>-->
+<!--            <input type="password" name="password" placeholder="••••••••" required>-->
+<!--        </div>-->
+<!--        <button type="submit" class="btn-submit">Sign In</button>-->
+<!--    </form>-->
+
+<!--    <div class="divider">-->
+<!--        <hr>-->
+<!--        <span>OR</span>-->
+<!--        <hr>-->
+<!--    </div>-->
+
+<!--    <div class="admin-access-box">-->
+<!--        <p style="font-size: 13px; margin: 0 0 12px 0; color: #cbd5e1;">Are you an Administrator?</p>-->
+<!--        <a th:href="@{/login}" style="text-decoration: none;">-->
+<!--            <button type="button" class="btn-admin">-->
+<!--                Admin Portal Access-->
+<!--            </button>-->
+<!--        </a>-->
+<!--    </div>-->
+
+<!--    <p class="footer-text">-->
+<!--        New User? <a th:href="@{/register}">Create an account</a>-->
+<!--    </p>-->
+<!--</div>-->
+
+<!--</body>-->
+<!--</html>-->
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | SecureStream</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Login | SecureStream Experience</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --primary: #3b82f6;
-            --bg: #0f172a;
-            --glass: rgba(255, 255, 255, 0.05);
+            --bg: #050505;
+            --primary: #ffffff;
+            --accent: #00f2fe;
+            --glass: rgba(255, 255, 255, 0.03);
             --border: rgba(255, 255, 255, 0.1);
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-            background: radial-gradient(circle at top right, #1e293b, #0f172a);
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg);
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
+            color: var(--primary);
             overflow: hidden;
+            position: relative;
         }
 
-        /* Background Animated Shapes */
-        .shape {
-            position: absolute;
-            filter: blur(80px);
-            z-index: -1;
-            border-radius: 50%;
+        /* --- CRYSTAL THEME BACKGROUND --- */
+        .aura {
+            position: fixed; width: 100vw; height: 100vh;
+            top: 0; left: 0; z-index: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(0, 242, 254, 0.1) 0%, transparent 80%);
         }
-        .shape-1 { width: 300px; height: 300px; background: var(--primary); top: -100px; right: -50px; opacity: 0.3; }
-        .shape-2 { width: 250px; height: 250px; background: #9333ea; bottom: -50px; left: -50px; opacity: 0.2; }
 
+        .crystal {
+            position: fixed; border: 1px solid var(--border);
+            background: var(--glass); backdrop-filter: blur(10px);
+            z-index: 1; pointer-events: none;
+            transition: transform 0.2s ease-out;
+        }
+
+        /* --- LOGIN CARD --- */
         .login-card {
-            background: var(--glass);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
+            background: rgba(10, 10, 10, 0.4);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
             border: 1px solid var(--border);
-            padding: 40px;
-            border-radius: 24px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 45px 35px;
+            border-radius: 35px;
+            width: 90%;
+            max-width: 410px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.9);
             text-align: center;
+            animation: slideUp 0.8s cubic-bezier(0.2, 1, 0.3, 1);
         }
 
-        .login-card h2 {
-            margin-bottom: 10px;
-            font-weight: 600;
-            font-size: 28px;
-            letter-spacing: -0.5px;
-            color: #fff;
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .subtitle {
-            color: #94a3b8;
-            font-size: 14px;
-            margin-bottom: 30px;
+        .header-area h2 {
+            font-size: 34px; font-weight: 700; letter-spacing: -1.5px;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
         }
 
-        .form-group {
-            margin-bottom: 20px;
-            text-align: left;
+        .header-area p {
+            font-size: 10px; letter-spacing: 4px; color: #666;
+            text-transform: uppercase; margin-bottom: 35px;
         }
+
+        .form-group { margin-bottom: 20px; text-align: left; }
 
         .form-group label {
-            display: block;
-            font-size: 13px;
-            margin-bottom: 8px;
-            color: #cbd5e1;
+            font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            color: #888; margin-bottom: 8px; display: block; padding-left: 5px;
         }
 
         input {
-            width: 100%;
-            padding: 12px 16px;
-            background: rgba(0, 0, 0, 0.2);
+            width: 100%; padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            color: white;
-            font-size: 14px;
+            border-radius: 16px; color: white; font-size: 15px;
             transition: 0.3s;
-            box-sizing: border-box;
         }
 
         input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+            outline: none; border-color: var(--accent);
+            background: rgba(0, 242, 254, 0.05);
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.15);
         }
 
         .btn-submit {
-            width: 100%;
-            padding: 14px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 10px;
+            width: 100%; padding: 16px;
+            background: var(--primary); color: #000;
+            border: none; border-radius: 16px;
+            font-weight: 700; font-size: 15px;
+            text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
         }
 
         .btn-submit:hover {
-            background: #2563eb;
             transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.4);
+            background: var(--accent);
+            box-shadow: 0 15px 30px rgba(0, 242, 254, 0.3);
         }
 
-        /* Error Message Styling */
         .error-msg {
-            background: rgba(239, 68, 68, 0.1);
-            color: #f87171;
-            padding: 12px;
-            border-radius: 10px;
-            font-size: 13px;
-            margin-bottom: 20px;
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        /* Admin Access Box Section */
-        .admin-access-box {
-            background: rgba(59, 130, 246, 0.08);
-            padding: 20px;
-            border-radius: 16px;
-            border: 1px dashed rgba(59, 130, 246, 0.3);
-            margin-top: 5px;
-            transition: 0.3s;
-        }
-
-        .admin-access-box:hover {
-            background: rgba(59, 130, 246, 0.12);
-            border-style: solid;
-        }
-
-        .btn-admin {
-            background: transparent;
-            border: 1.5px solid var(--primary);
-            color: var(--primary);
-            width: 100%;
-            padding: 10px;
-            border-radius: 10px;
-            font-weight: 600;
-            font-size: 14px;
-            cursor: pointer;
-            transition: 0.3s;
-        }
-
-        .btn-admin:hover {
-            background: var(--primary);
-            color: white;
+            font-size: 12px; color: #ff4d6d;
+            margin-bottom: 20px; padding: 12px;
+            border: 1px solid rgba(255, 77, 109, 0.3);
+            border-radius: 12px; background: rgba(255, 77, 109, 0.1);
         }
 
         .divider {
-            margin: 25px 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            margin: 30px 0; display: flex; align-items: center; gap: 15px;
+        }
+        .divider hr { flex: 1; border: 0; border-top: 1px solid var(--border); }
+        .divider span { font-size: 11px; color: #555; font-weight: 600; }
+
+        /* --- ADMIN BOX RE-HIGHLIGHTED --- */
+        .admin-box {
+            background: rgba(0, 242, 254, 0.03);
+            border: 1px dashed rgba(0, 242, 254, 0.3);
+            padding: 15px;
+            border-radius: 20px;
+            margin-bottom: 25px;
         }
 
-        .divider hr { flex: 1; border: 0; border-top: 1px solid var(--border); }
-        .divider span { font-size: 12px; color: #64748b; font-weight: 600; }
+        .btn-admin {
+            background: transparent; border: 1.5px solid var(--accent);
+            color: var(--accent); width: 100%; padding: 12px;
+            border-radius: 14px; font-size: 12px; font-weight: 700;
+            letter-spacing: 1px; cursor: pointer; transition: 0.3s;
+        }
 
-        .footer-text { margin-top: 25px; font-size: 14px; color: #94a3b8; }
-        .footer-text a { color: var(--primary); text-decoration: none; font-weight: 600; }
-        .footer-text a:hover { text-decoration: underline; }
+        .btn-admin:hover {
+            background: var(--accent); color: #000;
+            box-shadow: 0 0 20px rgba(0, 242, 254, 0.2);
+        }
+
+        /* --- REGISTER LINK RE-HIGHLIGHTED --- */
+        .footer-link {
+            font-size: 14px; color: #888;
+            border-top: 1px solid var(--border);
+            padding-top: 25px;
+        }
+        .footer-link a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 700;
+            border-bottom: 1px solid transparent;
+            transition: 0.3s;
+        }
+        .footer-link a:hover { border-bottom-color: var(--accent); }
     </style>
 </head>
 <body>
 
-<div class="shape shape-1"></div>
-<div class="shape shape-2"></div>
+<div class="aura"></div>
+
+<div class="crystal" style="width: 280px; height: 280px; top: -80px; right: -60px; transform: rotate(35deg);"></div>
+<div class="crystal" style="width: 180px; height: 180px; bottom: 10%; left: 5%; transform: rotate(-15deg);"></div>
 
 <div class="login-card">
-    <h2>SecureStream</h2>
-    <p class="subtitle">Enter your credentials to access the monitor</p>
+    <div class="header-area">
+        <h2>SecureStream</h2>
+        <p>Dynamic Monitoring Portal</p>
+    </div>
 
     <div th:if="${param.error}" class="error-msg">
-        Invalid username or password. Please try again.
+        Invalid credentials. Access Denied.
     </div>
 
     <form th:action="@{/login}" method="post">
         <div class="form-group">
-            <label>Username</label>
-            <input type="text" name="username" placeholder="e.g. user1" required autocomplete="off">
+            <label>Operator ID</label>
+            <input type="text" name="username" placeholder="Enter username" required autocomplete="off">
         </div>
         <div class="form-group">
-            <label>Password</label>
+            <label>Security Key</label>
             <input type="password" name="password" placeholder="••••••••" required>
         </div>
-        <button type="submit" class="btn-submit">Sign In</button>
+        <button type="submit" class="btn-submit">Launch Portal</button>
     </form>
 
     <div class="divider">
         <hr>
-        <span>OR</span>
+        <span>ADMIN ACCESS</span>
         <hr>
     </div>
 
-    <div class="admin-access-box">
-        <p style="font-size: 13px; margin: 0 0 12px 0; color: #cbd5e1;">Are you an Administrator?</p>
+    <div class="admin-box">
         <a th:href="@{/login}" style="text-decoration: none;">
             <button type="button" class="btn-admin">
-                Admin Portal Access
+                GO TO ADMIN PORTAL
             </button>
         </a>
     </div>
 
-    <p class="footer-text">
-        New User? <a th:href="@{/register}">Create an account</a>
-    </p>
+    <div class="footer-link">
+        Don't have an account? <a th:href="@{/register}">Create New User</a>
+    </div>
 </div>
+
+<script>
+    // Parallax Interaction
+    window.addEventListener('mousemove', (e) => {
+        const x = (e.clientX / window.innerWidth - 0.5) * 20;
+        const y = (e.clientY / window.innerHeight - 0.5) * 20;
+
+        document.querySelector('.login-card').style.transform = `rotateY(${x/4}deg) rotateX(${-y/4}deg)`;
+
+        const crystals = document.querySelectorAll('.crystal');
+        crystals[0].style.transform = `rotate(35deg) translate(${x}px, ${y}px)`;
+        crystals[1].style.transform = `rotate(-15deg) translate(${-x}px, ${-y}px)`;
+    });
+</script>
 
 </body>
 </html>

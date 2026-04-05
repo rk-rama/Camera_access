@@ -1,158 +1,341 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Create Account | SecureStream</title>-->
+<!--    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">-->
+<!--    <style>-->
+<!--        :root {-->
+<!--            &#45;&#45;primary: #22c55e; /* Green for Registration */-->
+<!--            &#45;&#45;bg: #0f172a;-->
+<!--            &#45;&#45;glass: rgba(255, 255, 255, 0.05);-->
+<!--            &#45;&#45;border: rgba(255, 255, 255, 0.1);-->
+<!--        }-->
+
+<!--        body {-->
+<!--            margin: 0;-->
+<!--            padding: 0;-->
+<!--            font-family: 'Poppins', sans-serif;-->
+<!--            background: radial-gradient(circle at bottom left, #1e293b, #0f172a);-->
+<!--            height: 100vh;-->
+<!--            display: flex;-->
+<!--            justify-content: center;-->
+<!--            align-items: center;-->
+<!--            color: white;-->
+<!--            overflow: hidden;-->
+<!--        }-->
+
+<!--        /* Background Glow Shapes */-->
+<!--        .shape { position: absolute; filter: blur(80px); z-index: -1; border-radius: 50%; }-->
+<!--        .shape-1 { width: 350px; height: 350px; background: #22c55e; bottom: -100px; left: -50px; opacity: 0.2; }-->
+<!--        .shape-2 { width: 200px; height: 200px; background: #3b82f6; top: -50px; right: 20px; opacity: 0.15; }-->
+
+<!--        .register-card {-->
+<!--            background: var(&#45;&#45;glass);-->
+<!--            backdrop-filter: blur(20px);-->
+<!--            -webkit-backdrop-filter: blur(20px);-->
+<!--            border: 1px solid var(&#45;&#45;border);-->
+<!--            padding: 40px;-->
+<!--            border-radius: 24px;-->
+<!--            width: 100%;-->
+<!--            max-width: 400px;-->
+<!--            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);-->
+<!--            text-align: center;-->
+<!--        }-->
+
+<!--        .register-card h2 {-->
+<!--            margin-bottom: 8px;-->
+<!--            font-weight: 600;-->
+<!--            font-size: 28px;-->
+<!--            letter-spacing: -0.5px;-->
+<!--        }-->
+
+<!--        .subtitle {-->
+<!--            color: #94a3b8;-->
+<!--            font-size: 14px;-->
+<!--            margin-bottom: 25px;-->
+<!--        }-->
+
+<!--        .form-group {-->
+<!--            margin-bottom: 15px;-->
+<!--            text-align: left;-->
+<!--        }-->
+
+<!--        .form-group label {-->
+<!--            display: block;-->
+<!--            font-size: 13px;-->
+<!--            margin-bottom: 6px;-->
+<!--            color: #cbd5e1;-->
+<!--        }-->
+
+<!--        input {-->
+<!--            width: 100%;-->
+<!--            padding: 12px 16px;-->
+<!--            background: rgba(0, 0, 0, 0.2);-->
+<!--            border: 1px solid var(&#45;&#45;border);-->
+<!--            border-radius: 12px;-->
+<!--            color: white;-->
+<!--            font-size: 14px;-->
+<!--            transition: 0.3s;-->
+<!--            box-sizing: border-box;-->
+<!--        }-->
+
+<!--        input:focus {-->
+<!--            outline: none;-->
+<!--            border-color: var(&#45;&#45;primary);-->
+<!--            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);-->
+<!--        }-->
+
+<!--        button {-->
+<!--            width: 100%;-->
+<!--            padding: 14px;-->
+<!--            background: var(&#45;&#45;primary);-->
+<!--            color: white;-->
+<!--            border: none;-->
+<!--            border-radius: 12px;-->
+<!--            font-weight: 600;-->
+<!--            font-size: 16px;-->
+<!--            cursor: pointer;-->
+<!--            transition: 0.3s;-->
+<!--            margin-top: 15px;-->
+<!--        }-->
+
+<!--        button:hover {-->
+<!--            background: #16a34a;-->
+<!--            transform: translateY(-2px);-->
+<!--            box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.3);-->
+<!--        }-->
+
+<!--        .login-link {-->
+<!--            margin-top: 25px;-->
+<!--            font-size: 14px;-->
+<!--            color: #94a3b8;-->
+<!--        }-->
+
+<!--        .login-link a {-->
+<!--            color: #3b82f6;-->
+<!--            text-decoration: none;-->
+<!--            font-weight: 600;-->
+<!--        }-->
+
+<!--        .login-link a:hover {-->
+<!--            text-decoration: underline;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--<div class="shape shape-1"></div>-->
+<!--<div class="shape shape-2"></div>-->
+
+<!--<div class="register-card">-->
+<!--    <h2>Join SecureStream</h2>-->
+<!--    <p class="subtitle">Set up your account to start streaming</p>-->
+
+<!--    <form th:action="@{/register}" method="post">-->
+<!--        <div class="form-group">-->
+<!--            <label>Full Name</label>-->
+<!--            <input type="text" name="fullName" placeholder="John Doe" required>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label>Username</label>-->
+<!--            <input type="text" name="username" placeholder="Choose a unique ID" required>-->
+<!--        </div>-->
+<!--        <div class="form-group">-->
+<!--            <label>Password</label>-->
+<!--            <input type="password" name="password" placeholder="Create a strong password" required>-->
+<!--        </div>-->
+<!--        <button type="submit">Create Account</button>-->
+<!--    </form>-->
+
+<!--    <div class="login-link">-->
+<!--        Already have an account? <a th:href="@{/login}">Sign In</a>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--</body>-->
+<!--</html>-->
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Account | SecureStream</title>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>Create Account | SecureStream Experience</title>
+
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            --primary: #22c55e; /* Green for Registration */
-            --bg: #0f172a;
-            --glass: rgba(255, 255, 255, 0.05);
+            --bg: #050505;
+            --primary: #ffffff;
+            --accent: #22c55e; /* Green accent for Registration */
+            --glass: rgba(255, 255, 255, 0.03);
             --border: rgba(255, 255, 255, 0.1);
         }
 
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
         body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Poppins', sans-serif;
-            background: radial-gradient(circle at bottom left, #1e293b, #0f172a);
+            font-family: 'Space Grotesk', sans-serif;
+            background-color: var(--bg);
             height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
-            color: white;
+            color: var(--primary);
             overflow: hidden;
+            position: relative;
         }
 
-        /* Background Glow Shapes */
-        .shape { position: absolute; filter: blur(80px); z-index: -1; border-radius: 50%; }
-        .shape-1 { width: 350px; height: 350px; background: #22c55e; bottom: -100px; left: -50px; opacity: 0.2; }
-        .shape-2 { width: 200px; height: 200px; background: #3b82f6; top: -50px; right: 20px; opacity: 0.15; }
+        /* --- CRYSTAL THEME BACKGROUND --- */
+        .aura {
+            position: fixed; width: 100vw; height: 100vh;
+            top: 0; left: 0; z-index: 0;
+            background: radial-gradient(circle at bottom left, rgba(34, 197, 94, 0.1) 0%, transparent 70%);
+        }
 
+        .crystal {
+            position: fixed; border: 1px solid var(--border);
+            background: var(--glass); backdrop-filter: blur(12px);
+            z-index: 1; pointer-events: none;
+            transition: transform 0.2s ease-out;
+        }
+
+        /* --- REGISTER CARD (CRYSTAL LOOK) --- */
         .register-card {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(10, 10, 10, 0.4);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
             border: 1px solid var(--border);
-            padding: 40px;
-            border-radius: 24px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            padding: 40px 35px;
+            border-radius: 35px;
+            width: 90%;
+            max-width: 410px;
+            position: relative;
+            z-index: 10;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.9);
             text-align: center;
+            animation: slideUp 0.8s cubic-bezier(0.2, 1, 0.3, 1);
         }
 
-        .register-card h2 {
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(40px); filter: blur(10px); }
+            to { opacity: 1; transform: translateY(0); filter: blur(0); }
+        }
+
+        .header-area h2 {
+            font-size: 32px; font-weight: 700; letter-spacing: -1.5px;
+            background: linear-gradient(to right, #fff, var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
             margin-bottom: 8px;
-            font-weight: 600;
-            font-size: 28px;
-            letter-spacing: -0.5px;
         }
 
-        .subtitle {
-            color: #94a3b8;
-            font-size: 14px;
-            margin-bottom: 25px;
+        .header-area p {
+            font-size: 10px; letter-spacing: 4px; color: #666;
+            text-transform: uppercase; margin-bottom: 30px;
         }
 
-        .form-group {
-            margin-bottom: 15px;
-            text-align: left;
-        }
+        .form-group { margin-bottom: 18px; text-align: left; }
 
         .form-group label {
-            display: block;
-            font-size: 13px;
-            margin-bottom: 6px;
-            color: #cbd5e1;
+            font-size: 11px; text-transform: uppercase; letter-spacing: 1px;
+            color: #888; margin-bottom: 6px; display: block; padding-left: 5px;
         }
 
         input {
-            width: 100%;
-            padding: 12px 16px;
-            background: rgba(0, 0, 0, 0.2);
+            width: 100%; padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.03);
             border: 1px solid var(--border);
-            border-radius: 12px;
-            color: white;
-            font-size: 14px;
+            border-radius: 15px; color: white; font-size: 14px;
             transition: 0.3s;
-            box-sizing: border-box;
         }
 
         input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.1);
+            outline: none; border-color: var(--accent);
+            background: rgba(34, 197, 94, 0.05);
+            box-shadow: 0 0 20px rgba(34, 197, 94, 0.15);
         }
 
         button {
-            width: 100%;
-            padding: 14px;
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
-            margin-top: 15px;
+            width: 100%; padding: 16px;
+            background: var(--primary); color: #000;
+            border: none; border-radius: 16px;
+            font-weight: 700; font-size: 15px;
+            text-transform: uppercase; letter-spacing: 1px;
+            cursor: pointer; transition: 0.3s; margin-top: 10px;
         }
 
         button:hover {
-            background: #16a34a;
             transform: translateY(-2px);
-            box-shadow: 0 10px 15px -3px rgba(34, 197, 94, 0.3);
+            background: var(--accent);
+            box-shadow: 0 15px 30px rgba(34, 197, 94, 0.3);
         }
 
         .login-link {
+            font-size: 14px; color: #888;
             margin-top: 25px;
-            font-size: 14px;
-            color: #94a3b8;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
         }
 
         .login-link a {
-            color: #3b82f6;
+            color: #3b82f6; /* Blue to match your login link original intent */
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
+            transition: 0.3s;
         }
 
-        .login-link a:hover {
-            text-decoration: underline;
-        }
+        .login-link a:hover { color: var(--accent); }
     </style>
 </head>
 <body>
 
-<div class="shape shape-1"></div>
-<div class="shape shape-2"></div>
+<div class="aura"></div>
+
+<div class="crystal" style="width: 300px; height: 300px; bottom: -80px; left: -60px; transform: rotate(-25deg);"></div>
+<div class="crystal" style="width: 150px; height: 150px; top: 10%; right: 5%; transform: rotate(15deg);"></div>
 
 <div class="register-card">
-    <h2>Join SecureStream</h2>
-    <p class="subtitle">Set up your account to start streaming</p>
+    <div class="header-area">
+        <h2>Join Stream</h2>
+        <p>Initialize New Operator</p>
+    </div>
 
     <form th:action="@{/register}" method="post">
         <div class="form-group">
             <label>Full Name</label>
-            <input type="text" name="fullName" placeholder="John Doe" required>
+            <input type="text" name="fullName" placeholder="Enter your name" required autocomplete="off">
         </div>
         <div class="form-group">
-            <label>Username</label>
-            <input type="text" name="username" placeholder="Choose a unique ID" required>
+            <label>Operator ID</label>
+            <input type="text" name="username" placeholder="Choose a unique ID" required autocomplete="off">
         </div>
         <div class="form-group">
-            <label>Password</label>
-            <input type="password" name="password" placeholder="Create a strong password" required>
+            <label>Security Key</label>
+            <input type="password" name="password" placeholder="Create strong password" required>
         </div>
         <button type="submit">Create Account</button>
     </form>
 
     <div class="login-link">
-        Already have an account? <a th:href="@{/login}">Sign In</a>
+        Already an Operator? <a th:href="@{/login}">Sign In</a>
     </div>
 </div>
+
+<script>
+    // Parallax Interaction (Matching Login/Shayari Page)
+    window.addEventListener('mousemove', (e) => {
+        const x = (e.clientX / window.innerWidth - 0.5) * 20;
+        const y = (e.clientY / window.innerHeight - 0.5) * 20;
+
+        document.querySelector('.register-card').style.transform = `rotateY(${x/4}deg) rotateX(${-y/4}deg)`;
+
+        const crystals = document.querySelectorAll('.crystal');
+        crystals[0].style.transform = `rotate(-25deg) translate(${x}px, ${y}px)`;
+        crystals[1].style.transform = `rotate(15deg) translate(${-x}px, ${-y}px)`;
+    });
+</script>
 
 </body>
 </html>
