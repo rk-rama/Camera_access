@@ -493,38 +493,137 @@
 <!--</script>-->
 <!--</body>-->
 <!--</html>-->
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Admin Control | SecureStream Pro</title>-->
+<!--    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">-->
+<!--    <style>-->
+<!--        * { box-sizing: border-box; margin: 0; padding: 0; }-->
+<!--        body, html { width: 100%; height: 100%; background: #000; font-family: 'Space Grotesk', sans-serif; color: white; overflow: hidden; }-->
+<!--        .monitor-box { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 1; }-->
+<!--        video { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.05) brightness(1.1); }-->
+<!--        .hud-top { position: absolute; top: 25px; left: 30px; right: 30px; display: flex; justify-content: space-between; z-index: 10; pointer-events: none; }-->
+<!--        .live-tag { background: #ef4444; padding: 8px 20px; border-radius: 4px; font-size: 11px; font-weight: 800; visibility: hidden; animation: blink 1.5s infinite; }-->
+<!--        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }-->
+<!--        .status-container { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 10; width: 100%; text-align: center; }-->
+<!--        .status-msg { display: inline-block; padding: 14px 40px; background: rgba(10, 10, 10, 0.8); border-radius: 100px; font-size: 13px; border: 1px solid rgba(255, 255, 255, 0.1); color: #00f2fe; text-transform: uppercase; }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<div class="monitor-box">-->
+<!--    <div class="hud-top"><div id="liveBadge" class="live-tag">Live Feed Active</div></div>-->
+<!--    <video id="remoteVideo" autoplay playsinline muted></video>-->
+<!--</div>-->
+<!--<div class="status-container"><div class="status-msg" id="statusMsg">Initializing...</div></div>-->
+
+<!--<script>-->
+<!--    let peerConnection;-->
+<!--    let socket;-->
+<!--    const config = {-->
+<!--        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }],-->
+<!--        sdpSemantics: 'unified-plan' // ✅ Force Unified Plan for mid matching-->
+<!--    };-->
+
+<!--    function updateStatus(text, color = "#00f2fe") {-->
+<!--        const msgBox = document.getElementById('statusMsg');-->
+<!--        msgBox.innerText = text;-->
+<!--        msgBox.style.color = color;-->
+<!--    }-->
+
+<!--    function connect() {-->
+<!--        socket = new WebSocket("wss://camera-access.onrender.com/video-stream");-->
+<!--        socket.onopen = () => updateStatus("Connected ✅ Waiting for Phone...", "#00f2fe");-->
+<!--        socket.onmessage = async (event) => {-->
+<!--            const data = JSON.parse(event.data);-->
+<!--            if (data.type === 'offer') {-->
+<!--                updateStatus("Offer detected. Handshaking...", "#a855f7");-->
+<!--                handleOffer(data);-->
+<!--            } else if (data.type === 'candidate' && peerConnection) {-->
+<!--                try { await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch (e) {}-->
+<!--            }-->
+<!--        };-->
+<!--        socket.onclose = () => {-->
+<!--            updateStatus("Reconnecting...", "#facc15");-->
+<!--            setTimeout(connect, 3000);-->
+<!--        };-->
+<!--    }-->
+
+<!--    async function handleOffer(offer) {-->
+<!--        if (peerConnection) peerConnection.close();-->
+<!--        peerConnection = new RTCPeerConnection(config);-->
+
+<!--        peerConnection.ontrack = (event) => {-->
+<!--            const remoteVideo = document.getElementById('remoteVideo');-->
+<!--            if (event.streams && event.streams[0]) {-->
+<!--                remoteVideo.srcObject = event.streams[0];-->
+<!--                document.getElementById('liveBadge').style.visibility = "visible";-->
+<!--                updateStatus("LIVE FEED ACTIVE 🟢", "#22c55e");-->
+<!--            }-->
+<!--        };-->
+
+<!--        peerConnection.onicecandidate = (e) => {-->
+<!--            if (e.candidate) socket.send(JSON.stringify({ type: 'candidate', candidate: e.candidate }));-->
+<!--        };-->
+
+<!--        try {-->
+<!--            // ✅ Fix: Set Remote Description with explicit object mapping-->
+<!--            await peerConnection.setRemoteDescription(new RTCSessionDescription({-->
+<!--                type: 'offer',-->
+<!--                sdp: offer.sdp-->
+<!--            }));-->
+
+<!--            const answer = await peerConnection.createAnswer();-->
+<!--            await peerConnection.setLocalDescription(answer);-->
+
+<!--            socket.send(JSON.stringify({-->
+<!--                type: 'answer',-->
+<!--                sdp: peerConnection.localDescription.sdp-->
+<!--            }));-->
+<!--            console.log("Handshake successful! ✅");-->
+<!--        } catch (e) {-->
+<!--            console.error("WebRTC Error:", e);-->
+<!--            updateStatus("Handshake Error! Check Console", "#ef4444");-->
+<!--        }-->
+<!--    }-->
+<!--    window.onload = connect;-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Control | SecureStream Pro</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body, html { width: 100%; height: 100%; background: #000; font-family: 'Space Grotesk', sans-serif; color: white; overflow: hidden; }
         .monitor-box { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 1; }
-        video { width: 100%; height: 100%; object-fit: cover; filter: contrast(1.05) brightness(1.1); }
-        .hud-top { position: absolute; top: 25px; left: 30px; right: 30px; display: flex; justify-content: space-between; z-index: 10; pointer-events: none; }
-        .live-tag { background: #ef4444; padding: 8px 20px; border-radius: 4px; font-size: 11px; font-weight: 800; visibility: hidden; animation: blink 1.5s infinite; }
+        video { width: 100%; height: 100%; object-fit: cover; }
+        .hud-top { position: absolute; top: 25px; left: 30px; z-index: 10; }
+        .live-tag { background: #ef4444; padding: 8px 20px; border-radius: 4px; font-size: 11px; visibility: hidden; animation: blink 1.5s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-        .status-container { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 10; width: 100%; text-align: center; }
+        .status-container { position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%); z-index: 10; text-align: center; width: 100%; }
         .status-msg { display: inline-block; padding: 14px 40px; background: rgba(10, 10, 10, 0.8); border-radius: 100px; font-size: 13px; border: 1px solid rgba(255, 255, 255, 0.1); color: #00f2fe; text-transform: uppercase; }
     </style>
 </head>
 <body>
 <div class="monitor-box">
-    <div class="hud-top"><div id="liveBadge" class="live-tag">Live Feed Active</div></div>
+    <div class="hud-top"><div id="liveBadge" class="live-tag">LIVE FEED ACTIVE</div></div>
     <video id="remoteVideo" autoplay playsinline muted></video>
 </div>
-<div class="status-container"><div class="status-msg" id="statusMsg">Initializing...</div></div>
+<div class="status-container"><div class="status-msg" id="statusMsg">Initializing secure connection...</div></div>
 
 <script>
     let peerConnection;
     let socket;
     const config = {
-        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }, { urls: 'stun:stun1.l.google.com:19302' }],
-        sdpSemantics: 'unified-plan' // ✅ Force Unified Plan for mid matching
+        iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
+        sdpSemantics: 'unified-plan'
     };
 
     function updateStatus(text, color = "#00f2fe") {
@@ -545,16 +644,12 @@
                 try { await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch (e) {}
             }
         };
-        socket.onclose = () => {
-            updateStatus("Reconnecting...", "#facc15");
-            setTimeout(connect, 3000);
-        };
+        socket.onclose = () => { updateStatus("Reconnecting...", "#facc15"); setTimeout(connect, 3000); };
     }
 
     async function handleOffer(offer) {
         if (peerConnection) peerConnection.close();
         peerConnection = new RTCPeerConnection(config);
-
         peerConnection.ontrack = (event) => {
             const remoteVideo = document.getElementById('remoteVideo');
             if (event.streams && event.streams[0]) {
@@ -563,30 +658,15 @@
                 updateStatus("LIVE FEED ACTIVE 🟢", "#22c55e");
             }
         };
-
         peerConnection.onicecandidate = (e) => {
             if (e.candidate) socket.send(JSON.stringify({ type: 'candidate', candidate: e.candidate }));
         };
-
         try {
-            // ✅ Fix: Set Remote Description with explicit object mapping
-            await peerConnection.setRemoteDescription(new RTCSessionDescription({
-                type: 'offer',
-                sdp: offer.sdp
-            }));
-
+            await peerConnection.setRemoteDescription(new RTCSessionDescription(offer));
             const answer = await peerConnection.createAnswer();
             await peerConnection.setLocalDescription(answer);
-
-            socket.send(JSON.stringify({
-                type: 'answer',
-                sdp: peerConnection.localDescription.sdp
-            }));
-            console.log("Handshake successful! ✅");
-        } catch (e) {
-            console.error("WebRTC Error:", e);
-            updateStatus("Handshake Error! Check Console", "#ef4444");
-        }
+            socket.send(JSON.stringify({ type: 'answer', sdp: peerConnection.localDescription.sdp }));
+        } catch (e) { updateStatus("Handshake Error!", "#ef4444"); }
     }
     window.onload = connect;
 </script>
