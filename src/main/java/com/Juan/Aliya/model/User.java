@@ -1,4 +1,4 @@
-package com.Camera.access.model;
+package com.Juan.Aliya.model;
 
 import jakarta.persistence.*;
 

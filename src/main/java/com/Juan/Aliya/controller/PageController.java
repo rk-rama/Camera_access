@@ -1,10 +1,9 @@
-package com.Camera.access.controller;
+package com.Juan.Aliya.controller;
 
-import com.Camera.access.model.User;
-import com.Camera.access.repository.UserRepository;
+import com.Juan.Aliya.model.User;
+import com.Juan.Aliya.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

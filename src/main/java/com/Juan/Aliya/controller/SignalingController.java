@@ -1,4 +1,4 @@
-package com.Camera.access.controller;
+package com.Juan.Aliya.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

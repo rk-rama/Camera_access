@@ -1,4 +1,4 @@
-package com.Camera.access.config;
+package com.Juan.Aliya.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

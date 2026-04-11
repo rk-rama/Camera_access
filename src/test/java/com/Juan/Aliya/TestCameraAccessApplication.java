@@ -1,4 +1,4 @@
-package com.Camera.access;
+package com.Juan.Aliya;
 
 import org.springframework.boot.SpringApplication;
 

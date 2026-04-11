@@ -1,7 +1,7 @@
-package com.Camera.access.handler;
+package com.Juan.Aliya.handler;
 
-import com.Camera.access.model.User;
-import com.Camera.access.repository.UserRepository;
+import com.Juan.Aliya.model.User;
+import com.Juan.Aliya.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.*;
 import org.springframework.stereotype.Service;

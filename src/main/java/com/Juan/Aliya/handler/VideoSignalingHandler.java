@@ -1,4 +1,4 @@
-package com.com.Camera.access.handler;
+package com.Juan.Aliya.handler;
 
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.TextMessage;

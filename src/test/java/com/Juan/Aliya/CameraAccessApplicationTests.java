@@ -1,4 +1,4 @@
-package com.Camera.access;
+package com.Juan.Aliya;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

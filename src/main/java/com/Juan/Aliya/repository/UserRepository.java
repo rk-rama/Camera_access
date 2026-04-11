@@ -1,6 +1,6 @@
-package com.Camera.access.repository;
+package com.Juan.Aliya.repository;
 
-import com.Camera.access.model.User;
+import com.Juan.Aliya.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 
